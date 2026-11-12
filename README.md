@@ -39,10 +39,6 @@ python run_experiments.py compare                  # this run's records vs resul
 
 The three defects are reproduced by the claim checks; read `replication/evidence/pr44844_G4_output.txt`, `pr41852_G4_output.txt` and `pr43269_G4_output.txt` against the `expect` line at the top of each. See `replication/README.md` for options and `RUNBOOK.md` for the manual version.
 
-## Use of AI
-
-The gate tooling, the claim checks and the triage in `results/` were produced with an AI assistant (Claude, Anthropic) under the first author's direction; the authors reviewed this work and reproduced all results on a separate machine. The requirement classification of record (`results/classification_rater_RN.md`) was performed by a human rater without AI assistance. See the article's Acknowledgments and `METHODOLOGY_AND_REPLICATION.md`.
-
 ## License
 
 Code under MIT; documents, evidence and supplements under CC BY 4.0 (see `LICENSE`). Excerpts of code and pull-request text from `Azure/azure-sdk-for-python` are reproduced under its MIT License for the purpose of documenting the study.
