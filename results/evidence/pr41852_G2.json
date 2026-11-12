@@ -1,0 +1,267 @@
+{
+  "gate_id": "G2",
+  "gate_type": "test_independence_mutation",
+  "linked_hypothesis_ids": [
+    "A1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "41852",
+    "commit": "d76b8ba34",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/red_team/__init__.py"
+    ]
+  },
+  "exercised": [
+    "20 mutants on 49 changed lines across 2 files; full package suite (tests/unittests/test_lazy_imports.py tests/unittests/test_evaluators)"
+  ],
+  "assumptions": [
+    "baseline suite green at d76b8ba34 (tests/unittests/test_lazy_imports.py tests/unittests/test_evaluators)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L61: str 'Create a lazy import' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L77: return X -> return None"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L79: remove raise"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L83: return X -> return None"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L86: str 'AIAgentConverter' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L87: str 'AIAgentConverter' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L88: str 'azure.ai.evaluation.' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L89: str 'azure-ai-projects' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L91: str 'SKAgentConverter' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L92: str 'SKAgentConverter' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L93: str 'azure.ai.evaluation.' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L94: str 'semantic-kernel' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L139: str 'AIAgentConverter' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L140: str 'SKAgentConverter' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L147: str 'Handle lazy imports ' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L148: In -> NotIn"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L149: return X -> return None"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L148: negate if-condition"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L150: remove raise"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/red_team/__init__.py",
+      "mutant": "L11: remove raise"
+    }
+  ],
+  "not_evaluated": [
+    "equivalent-mutant analysis (surviving mutants need manual review)",
+    "lines outside the PR diff",
+    "mutation operators beyond the 9 implemented (no statement deletion, no call-argument mutation)"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:27:59Z",
+  "mutation_score": 0.0,
+  "mutants": [
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L61: str 'Create a lazy import' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L77: return X -> return None",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L79: remove raise",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L83: return X -> return None",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L86: str 'AIAgentConverter' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L87: str 'AIAgentConverter' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L88: str 'azure.ai.evaluation.' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L89: str 'azure-ai-projects' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L91: str 'SKAgentConverter' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L92: str 'SKAgentConverter' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L93: str 'azure.ai.evaluation.' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L94: str 'semantic-kernel' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L139: str 'AIAgentConverter' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L140: str 'SKAgentConverter' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L147: str 'Handle lazy imports ' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L148: In -> NotIn",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L149: return X -> return None",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L148: negate if-condition",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py",
+      "mutant": "L150: remove raise",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/red_team/__init__.py",
+      "mutant": "L11: remove raise",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    }
+  ],
+  "machine_time_s": 105.3,
+  "hypotheses": {
+    "A1": {
+      "category": "must-hold",
+      "statement": "The public import surface (import *, hasattr) remains usable without the optional dependency",
+      "source": "analyst"
+    }
+  }
+}

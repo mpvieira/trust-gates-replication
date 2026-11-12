@@ -1,0 +1,417 @@
+# Configuration for run_experiments.py
+#
+# Set `enabled: true/false` per PR (or use --prs on the command line to override).
+# All eight PRs are enabled (the full study, 15–25 minutes). Set `enabled: false` or use `run --prs ...` to run a subset.
+# Paths are relative to the repository clone ($W/azsdk). `env` selects the test-environment
+# workaround the package needs: NONE, EVAL (azure-ai-evaluation), COSMOS (azure-cosmos).
+# `g4` describes the claim check: a script run at the merge commit and again with `files`
+# checked out from the parent commit; or `commands`, a list of shell commands run in the clone.
+
+# Each PR lists its trust hypotheses (id, category = must-hold | may-fail | cannot-guarantee, statement, the gates that
+# serve it, and its source); the runner copies them into every gate's evidence record.
+#   hypotheses:           H1..Hn are the independent rater's classification (RN, blind, from the PR description only,
+#                         2026-10-02; results/classification_rater_RN.md). H0 is standing: the change references only
+#                         interfaces that exist (the paper's 'hallucinated interface' failure mode), served by G1.
+#   analyst_hypotheses:   A1.. are requirements the analyst (the AI assistant) extracted that the rater did not. They are
+#                         NOT blind: written after the diffs and gate results had been seen. They are kept because some G4
+#                         checks were derived from them (e.g. #44844's attribution check, from reading the caller).
+
+repo: https://github.com/Azure/azure-sdk-for-python.git
+repo_name: Azure/azure-sdk-for-python
+clone_depth: 12000
+sparse_paths:
+- sdk/core/azure-core
+- sdk/confidentialledger/azure-confidentialledger
+- sdk/confidentialledger/azure-confidentialledger-certificate
+- sdk/identity/azure-identity
+- sdk/evaluation/azure-ai-evaluation
+- sdk/cosmos/azure-cosmos
+- eng/tools/azure-sdk-tools
+- tools/azure-sdk-tools
+setup:          # what `setup` installs from the clone; add packages here when adding a PR from a new SDK package
+  editable_packages:
+  - sdk/core/azure-core
+  - sdk/identity/azure-identity
+  - sdk/confidentialledger/azure-confidentialledger-certificate
+  - sdk/confidentialledger/azure-confidentialledger
+  - sdk/core/azure-core/tests/testserver_tests/coretestserver
+  - sdk/cosmos/azure-cosmos
+  tools_package_candidates:
+  - eng/tools/azure-sdk-tools
+  - tools/azure-sdk-tools
+  import_check:
+  - azure.core
+  - azure.confidentialledger
+  - azure.cosmos
+  - ci_tools
+  - devtools_testutils
+  nltk_data:
+  - punkt
+  - punkt_tab
+  - wordnet
+  - omw-1.4
+environments:   # test-environment profiles a PR can name in `env`; `{repo}` expands to the clone path
+  NONE:
+    env: {}
+    pytest_args: []
+    preflight:
+    - yaml
+    - pytest
+    - pyflakes
+    - cryptography
+    - trio
+    - aiohttp
+  EVAL:
+    env:
+      PYTHONPATH: '{repo}/sdk/evaluation/azure-ai-evaluation'
+    pytest_args: []
+    needs_nltk_data: true
+    preflight:
+    - yaml
+    - pytest
+    - pyflakes
+    - jwt
+    - nltk
+    - msrest
+    - filelock
+    - openai
+    - pandas
+    - httpx
+    - ruamel.yaml
+    - jinja2
+    - azure.storage.blob
+  COSMOS:
+    env: {}
+    pytest_args:
+    - --noconftest
+    preflight:
+    - yaml
+    - pytest
+    - pyflakes
+    - aiohttp
+    - azure.cosmos
+common_env:     # set for every PR: makes the azure-sdk `test_proxy` fixture a no-op (no proxy download)
+  AZURE_TEST_RUN_LIVE: 'true'
+  AZURE_SKIP_LIVE_RECORDING: 'true'
+scripts:        # gate implementations, relative to gates/ (G4 scripts are named per PR in each PR's g4 block)
+  G1: g1_interface.py
+  G2_G3: g2_g3_mutation.py
+  common: common.py         # shared helpers imported by the two scripts above; not run directly
+extra_gates: [] # additional gates, run for every PR after G1/G2/G3; see EXTENDING.md. To enable the shipped example:
+#  - id: G5
+#    script: example_extra_gate.py   # in gates/; called as: python <script> <repo> <commit> <PR> <outdir>
+#    description: TODO/FIXME markers on changed lines
+#    record: pr{pr}_G5.json          # the evidence record it writes
+gates:          # default selection when --gates is not given; G2 and G3 come from one mutation run
+- G1
+- G2
+- G3
+- G4
+prs:
+- number: 44844
+  enabled: true
+  commit: 7d26b949
+  package: sdk/evaluation/azure-ai-evaluation
+  env: EVAL
+  suite:
+  - tests/unittests/test_logging.py
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: must-hold
+    statement: Nested NodeLogManager contexts do not lead to RecursionError during evaluation runs
+    gates:
+    - G2
+    - G3
+    - G4
+    source: rater
+  - id: H2
+    category: may-fail
+    statement: Chained NodeLogWriter targets are unwrapped with cycle detection
+    gates:
+    - G2
+    - G3
+    - G4
+    source: rater
+  - id: H3
+    category: cannot-guarantee
+    statement: Unwrapping has a safe fallback to the real streams
+    gates:
+    - G2
+    - G3
+    source: rater
+  - id: H4
+    category: may-fail
+    statement: Existing NodeLogWriter instances are reused when streams are already wrapped
+    gates:
+    - G2
+    - G3
+    - G4
+    source: rater
+  analyst_hypotheses:
+  - id: A1
+    category: must-hold
+    statement: Per-run log attribution is preserved across a nesting boundary (reconstructed from the production caller)
+    gates:
+    - G4
+    source: analyst
+  g4:
+    script: g4_checks_pr44844.py
+    files:
+    - azure/ai/evaluation/_legacy/_common/_logging.py
+    expect: 'after: outer-after attributed to r2; before: attributed to r1'
+- number: 41852
+  enabled: true
+  commit: d76b8ba34
+  package: sdk/evaluation/azure-ai-evaluation
+  env: EVAL
+  suite:
+  - tests/unittests/test_lazy_imports.py
+  - tests/unittests/test_evaluators
+  requires_absent_module: azure.ai.projects
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: may-fail
+    statement: Importing azure.ai.evaluation without using the converters produces no informational message
+    gates:
+    - G4
+    source: rater
+  analyst_hypotheses:
+  - id: A1
+    category: must-hold
+    statement: The public import surface (import *, hasattr) remains usable without the optional dependency
+    gates:
+    - G1
+    - G2
+    - G3
+    - G4
+    source: analyst
+  g4:
+    script: g4_checks_pr41852.py
+    files:
+    - azure/ai/evaluation/__init__.py
+    - azure/ai/evaluation/red_team/__init__.py
+    expect: 'after: hasattr and import * raise ImportError; before: hasattr False, import * ok'
+- number: 43269
+  enabled: true
+  commit: 7e59645b2
+  package: sdk/cosmos/azure-cosmos
+  env: COSMOS
+  suite:
+  - tests/test_base_unit.py
+  - tests/test_session_token_unit.py
+  - tests/routing/test_routing_map_provider.py
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: may-fail
+    statement: When max_concurrency is not specified, the synchronous SDK uses the ThreadPoolExecutor default
+    gates:
+    - G2
+    source: rater
+  - id: H2
+    category: may-fail
+    statement: The create_database overloads accept a response_hook parameter
+    gates:
+    - G2
+    - G4
+    source: rater
+  - id: H3
+    category: may-fail
+    statement: The create_database overload signatures no longer include the deprecated populate_query_metrics parameter
+    gates: []
+    source: rater
+  - id: H4
+    category: may-fail
+    statement: offer_throughput is keyword-only in the synchronous overloads
+    gates: []
+    source: rater
+  analyst_hypotheses:
+  - id: A1
+    category: must-hold
+    statement: Async read_items behaviour is unchanged, as the description states (default 10)
+    gates:
+    - G2
+    - G4
+    source: analyst
+  g4:
+    script: g4_checks_pr43269.py
+    files:
+    - azure/cosmos/aio/_read_items_helper_async.py
+    - azure/cosmos/cosmos_client.py
+    expect: 'after: async default 5; before: 10'
+- number: 46707
+  enabled: true
+  commit: 53dcd7783357a76ba374dec23c46ef772865231c
+  package: sdk/confidentialledger/azure-confidentialledger
+  env: NONE
+  suite:
+  - tests/receipt
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: cannot-guarantee
+    statement: assert statements in _receipt_verification.py are replaced with explicit checks raising ValueError
+    gates:
+    - G2
+    - G4
+    source: rater
+  analyst_hypotheses:
+  - id: A1
+    category: must-hold
+    statement: Malformed receipts are rejected, including under python -O
+    gates:
+    - G2
+    - G4
+    source: analyst
+  g4:
+    script: g4_checks_pr46707.py
+    files:
+    - azure/confidentialledger/receipt/_receipt_verification.py
+    also_optimized: true
+    expect: 'after: all malformed inputs rejected in both modes; before under -O: all accepted'
+- number: 41492
+  enabled: true
+  commit: 0c347e994
+  package: sdk/evaluation/azure-ai-evaluation
+  env: EVAL
+  suite:
+  - tests/unittests/test_evaluators
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: must-hold
+    statement: A score-based evaluator returns the correct pass/fail result for decimal scores against the threshold, for both higher- and lower-is-better
+    gates:
+    - G2
+    - G3
+    - G4
+    source: rater
+  g4:
+    script: g4_checks_pr41492.py
+    files:
+    - azure/ai/evaluation/_evaluators/_common/_base_eval.py
+    expect: 'after: C2 pass, C3 2.5 vs 2 -> fail, C4 pass; before: C2 fail, C3 -> pass (wrong), C4 fail'
+- number: 44770
+  enabled: true
+  commit: 9a8a19a39
+  package: sdk/cosmos/azure-cosmos
+  env: COSMOS
+  suite:
+  - tests/test_partition_split_retry_unit.py
+  - tests/test_partition_split_retry_unit_async.py
+  - tests/routing/test_routing_map_provider.py
+  - tests/test_base_unit.py
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: must-hold
+    statement: Partition split handling does not recurse infinitely on a 410
+    gates:
+    - G2
+    - G3
+    source: rater
+  analyst_hypotheses:
+  - id: A1
+    category: must-hold
+    statement: 'The port matches the human hotfix PR #44649'
+    gates:
+    - G4
+    source: analyst
+  g4:
+    commands:
+    - git rev-parse -q --verify pr44649 >/dev/null || git fetch -q --depth=1 origin pull/44649/head:pr44649
+    - for f in azure/cosmos/_execution_context/base_execution_context.py azure/cosmos/_execution_context/aio/base_execution_context.py azure/cosmos/_routing/routing_map_provider.py azure/cosmos/_routing/aio/routing_map_provider.py
+      azure/cosmos/_synchronized_request.py azure/cosmos/aio/_asynchronous_request.py; do echo "$f -> $(git diff --stat pr44649 9a8a19a39 -- sdk/cosmos/azure-cosmos/$f | tail -1)"; done
+    - git diff pr44649 9a8a19a39 -- sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py | grep '^[+-]' | grep -v '^+++\|^---'
+    - for r in pr44649 9a8a19a39; do echo "$r flag-pop lines:"; git show $r:sdk/cosmos/azure-cosmos/azure/cosmos/_synchronized_request.py | grep -n _internal_pk_range_fetch; done
+    expect: execution contexts differ by one added warning log; routing providers identical; flag pop in both
+- number: 42047
+  enabled: true
+  commit: 54d45994a
+  package: sdk/evaluation/azure-ai-evaluation
+  env: EVAL
+  suite:
+  - tests/unittests/test_safety_evaluation.py
+  - tests/unittests/test_non_adv_simulator.py
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: must-hold
+    statement: The same randomization_seed always returns the same query sets
+    gates:
+    - G2
+    - G3
+    - G4
+    source: rater
+  - id: H2
+    category: must-hold
+    statement: SafetyEvaluation with a randomization_seed does not modify the global random state
+    gates:
+    - G4
+    source: rater
+  g4:
+    commands:
+    - git show 54d45994a --format= -- '*_safety_evaluation.py' | grep '^+'
+    - grep -n "as_completed\|max_simulation_results" sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_adversarial_simulator.py | head
+    - git show 54d45994a --format= -- '*test_safety_evaluation.py' | grep '^+' | grep -n "random.Random\|Simulator(" || echo "no simulator instantiated in the added tests"
+    expect: seed forwarded; results collected with as_completed; PR tests exercise random.Random only (static check; live run needed for the ordering/count claim)
+- number: 45366
+  enabled: true
+  commit: 41391f1e7b5ad52e3d480a7adcbf3fa5b99e2326
+  package: sdk/core/azure-core
+  env: NONE
+  suite:
+  - tests/test_pipeline.py
+  - tests/test_basic_transport.py
+  hypotheses:
+  - id: H0
+    category: must-hold
+    statement: The change references only modules, symbols and attributes that exist (no hallucinated interfaces)
+    gates:
+    - G1
+    source: standing
+  - id: H1
+    category: must-hold
+    statement: Query-string-only format_url templates preserve a trailing slash in the resolved base URL
+    gates:
+    - G2
+    - G3
+    source: rater
+  g4: null

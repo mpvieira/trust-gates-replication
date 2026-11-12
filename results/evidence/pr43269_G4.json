@@ -1,0 +1,75 @@
+{
+  "gate_id": "G4",
+  "gate_type": "claim_implementation_correspondence",
+  "linked_hypothesis_ids": [
+    "H2",
+    "A1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "43269",
+    "commit": "7e59645b2",
+    "files": [
+      "azure/cosmos/aio/_read_items_helper_async.py",
+      "azure/cosmos/aio/_container.py",
+      "azure/cosmos/cosmos_client.py",
+      "azure/cosmos/aio/_cosmos_client.py"
+    ]
+  },
+  "exercised": [
+    "async helper signature default and effective value when not provided: parent 10; PR 5; main today 5",
+    "PR description: 'Async path unchanged ... retains max_concurrency: int = 10' and 'Async: continues to use default of 10'",
+    "no CHANGELOG entry in the PR",
+    "create_database docstring types response_hook as a two-argument callable; implementation calls it with one argument (consistent with other cosmos_client hooks)"
+  ],
+  "assumptions": [],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "confirmed_defect",
+      "failure_mode": "claim_implementation_divergence",
+      "severity": "minor",
+      "detail": "PR description asserts the async path is unchanged with default 10; the change halves the async read_items default to 5 with no changelog entry. Escaped: CI green, no review comment. Present on main 2026-09-28"
+    },
+    {
+      "kind": "evidence_gap",
+      "detail": "0/9 mutants killed; PR shipped no tests and no unit test covers the changed code"
+    }
+  ],
+  "not_evaluated": [
+    "runtime effect of the halved default on throughput",
+    "overload typing checks (mypy) which CI may run"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:35:05Z",
+  "claims": [
+    {
+      "claim": "async path unchanged, default 10",
+      "status": "not supported: async default changed to 5"
+    },
+    {
+      "claim": "max_concurrency optional on sync path",
+      "status": "supported statically"
+    },
+    {
+      "claim": "response_hook added to create_database overloads and invoked",
+      "status": "supported; docstring signature inconsistent with call"
+    }
+  ],
+  "machine_time_s": 0.0,
+  "hypotheses": {
+    "H2": {
+      "category": "may-fail",
+      "statement": "The create_database overloads accept a response_hook parameter",
+      "source": "rater"
+    },
+    "A1": {
+      "category": "must-hold",
+      "statement": "Async read_items behaviour is unchanged, as the description states (default 10)",
+      "source": "analyst"
+    }
+  },
+  "hypothesis_note": "Re-linked 2026-10-02 to the independent rater's classification (H1..Hn) and the analyst's non-blind extra requirements (A1..). Free-text fields below (exercised, claims, findings) were written during triage on 2026-09-28/29 and may refer to the analyst's earlier H-numbering."
+}

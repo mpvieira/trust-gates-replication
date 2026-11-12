@@ -1,0 +1,101 @@
+{
+  "gate_id": "G2",
+  "gate_type": "test_independence_mutation",
+  "linked_hypothesis_ids": [
+    "H1",
+    "H2"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "41492",
+    "commit": "0c347e994",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_version.py"
+    ]
+  },
+  "exercised": [
+    "5 mutants on 3 changed lines across 2 files; full package suite (tests/unittests/test_evaluators)"
+  ],
+  "assumptions": [
+    "baseline suite green at 0c347e994 (tests/unittests/test_evaluators)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L419: GtE -> Gt"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L424: LtE -> Lt"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L424: negate if-condition"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_version.py",
+      "mutant": "L6: str '1.9.0' -> mutated"
+    }
+  ],
+  "not_evaluated": [
+    "equivalent-mutant analysis (surviving mutants need manual review)",
+    "lines outside the PR diff",
+    "mutation operators beyond the 9 implemented (no statement deletion, no call-argument mutation)"
+  ],
+  "tool_versions": {
+    "python": "3.12.4"
+  },
+  "timestamp": "2026-09-29T23:57:22Z",
+  "mutation_score": 0.2,
+  "mutants": [
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L419: GtE -> Gt",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L419: negate if-condition",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": true
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L424: LtE -> Lt",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L424: negate if-condition",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_version.py",
+      "mutant": "L6: str '1.9.0' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    }
+  ],
+  "machine_time_s": 25.6,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "Pass/fail result reflects a float comparison against the threshold"
+    },
+    "H2": {
+      "category": "must-hold",
+      "statement": "Lower-is-better evaluators fail when the score exceeds the threshold"
+    }
+  }
+}

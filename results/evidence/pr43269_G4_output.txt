@@ -1,0 +1,16 @@
+# G4 for PR #43269 at 7e59645b2 — 2026-09-29 01:10 UTC
+# expected: after: async default 5; before: 10
+# hypothesis H2 (must-hold): Async behaviour unchanged, as the PR description states
+# hypothesis H3 (may-fail): response_hook is invoked on create_database
+
+## AFTER the PR (merge commit)
+async helper signature default: 5
+async effective max_concurrency when not provided: 5
+create_database docstring hook type: None
+create_database actual call:          response_hook(None)
+
+## BEFORE the PR (changed files from parent)
+async helper signature default: 10
+async effective max_concurrency when not provided: 10
+create_database docstring hook type: Callable[[Mapping[str, str]], None]
+create_database actual call:          response_hook(self.client_connection.last_response_headers)

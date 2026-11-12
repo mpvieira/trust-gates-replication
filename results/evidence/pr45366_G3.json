@@ -1,0 +1,42 @@
+{
+  "gate_id": "G3",
+  "gate_type": "own_suite_sensitivity",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "45366",
+    "commit": "41391f1e7b5ad52e3d480a7adcbf3fa5b99e2326",
+    "files": [
+      "sdk/core/azure-core/azure/core/pipeline/transport/_base.py"
+    ]
+  },
+  "exercised": [
+    "0 mutants; PR-authored/modified tests only: ['test_pipeline.py']"
+  ],
+  "assumptions": [
+    "baseline suite green at 41391f1e7b5ad52e3d480a7adcbf3fa5b99e2326 (tests/test_pipeline.py tests/test_basic_transport.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "pass",
+  "findings": [],
+  "not_evaluated": [
+    "whether PR tests were AI-generated alongside the code (assumed: same author)",
+    "equivalent mutants"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T20:42:20Z",
+  "own_suite_detection_rate": null,
+  "machine_time_s": 3.9,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "Query-string-only format_url templates preserve a trailing slash in the resolved base URL",
+      "source": "rater"
+    }
+  }
+}

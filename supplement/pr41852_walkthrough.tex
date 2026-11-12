@@ -1,0 +1,319 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[T1]{fontenc}
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage[colorlinks,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black]{hyperref}
+
+
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,
+  framerule=0.3pt,rulecolor=\color{black!40},xleftmargin=4pt,showstringspaces=false,
+  commentstyle=\color{black!55},language=Python,literate={`}{\textasciigrave}1}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\musthold}{\textsc{must-hold}}
+\newcommand{\mayfail}{\textsc{may-fail}}
+\newcommand{\cannot}{\textsc{cannot-guarantee}}
+\newcommand{\note}[1]{\begin{quote}\small\color{black!70}#1\end{quote}}
+
+\title{A Worked Case: Trust Gates on Pull Request \#41852\\
+\large \code{Azure/azure-sdk-for-python}, authored by the GitHub Copilot coding agent}
+\author{Supplement to \emph{Engineering Trust When AI Writes Your Software}}
+\date{Evidence gathered 2026-09-28/29; all commands reproducible with the replication package}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent This supplement walks through one pull request from the case study in full: what the reviewer saw, how the requirements were classified into trust hypotheses, what each of the four trust gates was asked to establish, what it produced, how the findings were triaged, and how the project's own later history confirmed the result. PR \#41852 was chosen because its story closes without our intervention: seventeen days after the agent's change was merged with CI green and a human approval, a maintainer opened a fix for exactly the behaviour the claim check flags. Every output quoted here is in the replication package's \code{results/evidence/} folder, and every step can be re-run with \code{run\_experiments.py}.
+\end{abstract}
+
+\section{The pull request as the reviewer saw it}
+
+\paragraph{The task.} A user reported that merely importing the package printed a line:
+\begin{lstlisting}[language={}]
+>>> import azure.ai.evaluation
+[INFO] Could not import AIAgentConverter. Please install the dependency with `pip install azure-ai-projects`.
+\end{lstlisting}
+The line appeared for everyone, including users who never touch the optional converter classes. The GitHub Copilot coding agent was assigned the issue.
+
+\paragraph{The description.} The agent's PR body states the problem, then the solution: ``Implemented lazy loading mechanism using Python's module-level \code{\_\_getattr\_\_} to defer imports until the classes are actually accessed'', with a before/after summary (``\textbf{After}: Messages are only shown when someone actually tries to use the converter classes'') and five numbered changes: removed the import-time print statements; added lazy import functions; implemented module-level \code{\_\_getattr\_\_}; applied the pattern to both \code{AIAgentConverter} and \code{SKAgentConverter}; added ``comprehensive'' tests.
+
+\paragraph{The diff.} In \code{azure/ai/evaluation/\_\_init\_\_.py} (+59/$-$12) the two \code{try: import \ldots except ImportError: print(\ldots)} blocks are replaced by a factory and a module-level \code{\_\_getattr\_\_}:
+\begin{lstlisting}
+_lazy_imports = {}
+
+def _create_lazy_import(class_name, module_path, dependency_name):
+    def lazy_import():
+        try:
+            module = __import__(module_path, fromlist=[class_name])
+            cls = getattr(module, class_name)
+            _patch_all.append(class_name)
+            return cls
+        except ImportError:
+            raise ImportError(
+                f"Could not import {class_name}. Please install the dependency with `pip install {dependency_name}`."
+            )
+    return lazy_import
+
+_lazy_imports["AIAgentConverter"] = _create_lazy_import(
+    "AIAgentConverter", "azure.ai.evaluation._converters._ai_services", "azure-ai-projects")
+_lazy_imports["SKAgentConverter"] = _create_lazy_import(
+    "SKAgentConverter", "azure.ai.evaluation._converters._sk_services", "semantic-kernel")
+
+__all__ = [
+    "evaluate",
+    ...
+    # Include lazy imports in __all__ so they appear as available
+    "AIAgentConverter",
+    "SKAgentConverter",
+]
+
+def __getattr__(name):
+    """Handle lazy imports for optional dependencies."""
+    if name in _lazy_imports:
+        return _lazy_imports[name]()
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+\end{lstlisting}
+Two lines matter more than the rest and are easy to pass over: the two names are added to \code{\_\_all\_\_}, with the agent's own comment, ``so they appear as available''. A second file, \code{red\_team/\_\_init\_\_.py}, changes a \code{print} on missing \code{pyrit} into a \code{raise ImportError} (4 lines). A new test file, \code{tests/unittests/test\_lazy\_imports.py} (135 lines), holds three tests.
+
+\paragraph{The merge.} Squash commit \code{d76b8ba34}, merged 2025-07-14 into \code{main}. CI reported success. One human maintainer approved. Nothing in the diff, the description, or the test results gave a reviewer a reason to ask a question.
+
+\section{Requirements and trust hypotheses}
+\label{sec:hyp}
+
+The framework asks the team to classify, before reading the implementation, what can be defended about each requirement the change is meant to satisfy. The requirements were extracted from the issue and the PR description only.
+
+\paragraph{R1.} Nothing is printed at import time when an optional dependency is absent.
+
+\paragraph{R2.} The package's public import surface remains usable for users who do not have the optional dependency.
+
+R1 is the requirement the issue states. R2 is implicit: it is what ``the fix must not break'' and is the kind of requirement that never gets written down, which is exactly why the framework asks for it to be classified.
+
+\subsection{What the three levels demand}
+The classification is not a priority ranking; it is a commitment about evidence.
+\begin{itemize}[nosep]
+  \item \musthold: violation is unacceptable. The team owes the strongest evidence it can produce, and if the property cannot be defended, the requirement or the design must change.
+  \item \mayfail: occasional deviation is tolerable if it is detected and handled. The team owes detection, not proof.
+  \item \cannot: the team cannot promise the property. It owes an explicit statement of the limit and a containment strategy.
+\end{itemize}
+
+\subsection{The two-question procedure, applied}
+\emph{Question 1:} would a violation be a security, safety, data-integrity or compliance failure, or make the artifact unfit for its purpose? \emph{Question 2:} does correct behaviour depend on resolving a specification ambiguity, on state the artifact cannot observe, on completeness over an open-ended input space, or on behaviour with no reference implementation? Both answers are recorded even when the first already decides the level.
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{l l l l X}
+\toprule
+ & Q1 & Q2 & Level & Reasoning \\
+\midrule
+R1 & no & no & \mayfail\ (H1) & A stray \code{[INFO]} line is noise, not a failure; the behaviour is fully specified and directly observable. One observation suffices as evidence. \\
+R2 & \textbf{yes} & \textbf{yes} & \musthold\ (H2) & A package that raises on import for users lacking an optional extra is unfit for that class of users (Q1). Whether R2 holds depends on what ``using the package'' means, and neither the issue nor the description says (Q2). \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{Why R2 is the interesting case.} R2 answers yes to both questions. Under a priority scheme it is simply ``high priority'' and the reviewer moves on. Under this classification it is \musthold\ \emph{and} ambiguity-dependent, which tells the team two things at once: strong evidence is required, and the evidence must cover the alternative readings of the ambiguity. The alternative readings are the standard ways Python code touches a package's names: \code{import x}, \code{from x import name}, \code{from x import *}, \code{hasattr(x, name)}, \code{dir(x)}, and documentation or IDE tooling that walks \code{\_\_all\_\_}. The agent resolved the ambiguity in favour of one reading, explicit attribute access, without saying so. This classification is what generated checks S1 and S2 in Section~\ref{sec:g4}; the causal chain from classification to detection is the point of the example.
+
+\paragraph{Why R2 is not \cannot.} The ambiguity is resolvable: the import idioms are finite and known, so the property can be promised after enumerating them. \cannot\ is reserved for properties the team could not defend even with effort. This is the judgment call in the PR, and raters may disagree on it; see the note at the end of this section.
+
+\subsection{Gate plan}
+The classification determines which gates serve which hypothesis:
+\begin{center}\small
+\begin{tabularx}{\textwidth}{X l X}
+\toprule
+Hypothesis & Level & Gates \\
+\midrule
+H1 no output at import time & \mayfail & G4 (one observation) \\
+H2 import surface usable without the dependency & \musthold & G1, G4 (across import idioms); G2/G3 (is the mechanism defended at all?) \\
+H0 referenced interfaces exist (standing, every PR) & \musthold & G1 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\note{Both requirements were classified by a single analyst (the AI assistant) who had already seen the diff and the gate results; this classification is therefore not blind and is informed by hindsight. An independent human rater, working from the description only, extracted R1 but not R2. R2's double ``yes'' is the kind of case on which raters may differ (some would argue \cannot); the human rater's blind classification supersedes this one. Part of the procedure's value is that it forces this disagreement into the open before the code is examined.}
+
+\section{Environment and baseline}
+Everything below runs against the repository checked out at the merge commit, with one precondition that matters: the optional dependency must be \emph{absent}, because the defect only exists in that state.
+\begin{lstlisting}[language=bash]
+git checkout d76b8ba34
+export PYTHONPATH=$PWD/sdk/evaluation/azure-ai-evaluation   # package used in place
+export AZURE_TEST_RUN_LIVE=true AZURE_SKIP_LIVE_RECORDING=true   # neutralise the test-proxy fixture
+python -c "import azure.ai.projects"   # -> ModuleNotFoundError: the precondition
+python -m pytest -q tests/unittests/test_lazy_imports.py tests/unittests/test_evaluators   # 41 passed
+\end{lstlisting}
+The baseline is green. This is the premise of the escape argument: whatever the gates find below was already in code that conventional practice had accepted.
+
+\section{G1: interface resolution}
+\paragraph{What it establishes.} That the change does not reference anything that does not exist (the ``hallucinated interface'' failure mode). It runs \code{pyflakes} on each changed file and keeps undefined-name reports on changed lines; resolves every import on a changed line with \code{importlib}; and checks every \code{module.attr} on a changed line against the real imported module.
+
+\paragraph{What it exercised.} 49 changed lines across the two \code{\_\_init\_\_.py} files; every import resolved; every attribute reference resolved.
+
+\paragraph{Result.} Pass, no findings.
+
+\paragraph{Reading the result.} A pass is evidence that one failure mode is absent, not evidence that the change is correct. The record says so in its \code{not\_evaluated} field: method calls on objects of inferred type, string-referenced module paths (the \code{\_\_import\_\_} calls above take strings, which G1 cannot resolve statically), and behaviour with the dependency installed. G1 contributes nothing to H2 beyond ruling out one way of failing it; its value in this PR is that it ran and is on record.
+
+\section{G2 and G3: mutation on the changed lines}
+\paragraph{What they establish.} Whether the tests that exist would notice if the changed code were wrong. G2 runs each mutant against the package's test suite; G3 runs the same mutants against only the tests the PR itself added. When the two agree, the PR's tests are the only tests exercising the change, which is the ``closed loop'' the paper's introduction describes.
+
+\paragraph{Operators.} Single-point mutants only on lines the PR added or modified: comparison flips, \code{and}/\code{or} swap, \code{not} removal, arithmetic swaps, constant changes (booleans, numbers, strings), \code{return X}~$\to$~\code{return None}, \code{raise}~$\to$~\code{pass}, and negation of \code{if} conditions.
+
+\paragraph{Result.} 20 mutants; 0 killed by the package suite; 0 killed by the PR's tests.
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{l X X l}
+\toprule
+Line & Code & Mutation & Suite / PR tests \\
+\midrule
+77 & \code{return cls} (lazy\_import) & \code{return None} & survived / survived \\
+79 & \code{raise ImportError(\ldots)} (lazy\_import) & remove \code{raise} & survived / survived \\
+83 & \code{return lazy\_import} & \code{return None} & survived / survived \\
+86--94 & the two \code{\_create\_lazy\_import(\ldots)} calls & each of 8 string arguments mutated & survived / survived \\
+139--140 & \code{"AIAgentConverter"}, \code{"SKAgentConverter"} in \code{\_\_all\_\_} & string mutated & survived / survived \\
+148 & \code{if name in \_lazy\_imports:} & \code{in}~$\to$~\code{not in} & survived / survived \\
+148 & same & negate condition & survived / survived \\
+149 & \code{return \_lazy\_imports[name]()} & \code{return None} & survived / survived \\
+150 & \code{raise AttributeError(\ldots)} & remove \code{raise} & survived / survived \\
+61, 147 & two docstrings & string mutated & survived / survived (cosmetic) \\
+11 (red\_team) & \code{raise ImportError(\ldots)} & remove \code{raise} & survived / survived \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Discounting the two docstring mutants as cosmetic, eighteen behavioural mutants survive, including the ones that disable the mechanism outright: negating the \code{\_\_getattr\_\_} condition, returning \code{None} instead of the class, and deleting either \code{raise}.
+
+\paragraph{Why: the tests test a copy.} The PR's test file explains itself. Its first test opens with:
+\begin{lstlisting}
+# Test imports that would normally fail with missing dependencies
+# Since we can't easily control the dependency availability in the test environment,
+# we test the lazy import setup directly
+
+# This should not print any messages during setup
+_lazy_imports = {}
+_patch_all = []
+
+def _create_lazy_import(class_name, module_path, dependency_name):
+    ...   # a verbatim copy of the factory from __init__.py
+\end{lstlisting}
+and its second and third tests define a local function documented as ``Mock \code{\_\_getattr\_\_} function like the one in \code{\_\_init\_\_.py}'' and assert on that. The file never imports the mechanism it is named after. Its first test is also decorated \code{@pytest.mark.skipif(has\_semantic\_kernel, \ldots)}, so it is skipped precisely in the environments where the behaviour could be observed. The tests pass for any implementation of \code{\_\_init\_\_.py} whatsoever, which is what a 0/20 score means.
+
+\paragraph{What G2/G3 contributed.} Not the defect, but the question. A must-hold hypothesis (H2) whose implementing mechanism has no test protection at all cannot be defended by the evidence the PR ships, so the claim check must supply the evidence itself.
+
+\section{G4: claim checks}
+\label{sec:g4}
+\paragraph{What it establishes.} Whether each behavioural statement in the PR description is true of the code. Each claim becomes one executable check that would fail (or print a distinguishable result) if the claimed behaviour were absent. The script runs at the merge commit and again with the changed files restored from the parent commit, so every check has a before/after value.
+
+\paragraph{The claims, as sentences.}
+\begin{enumerate}[nosep,label=(\alph*)]
+  \item No message is printed at import time.
+  \item Messages are shown only when someone actually tries to use the converter classes.
+  \item Module-level \code{\_\_getattr\_\_} intercepts attribute access.
+  \item Both converters use the same pattern.
+  \item The tests are comprehensive.
+\end{enumerate}
+(e) is settled by Section~5. (a), (c) and (d) each map to one direct check. (b) is the claim that carries H2 and it is stated in terms of intent (``tries to use''), so the check is to find ways of \emph{not} using the converters that still trigger the path. The two standard idioms that touch every name in \code{\_\_all\_\_} without using any of them are \code{from pkg import *} and \code{hasattr(pkg, name)}. These became checks S1 and S2; they are not mentioned anywhere in the PR, and they exist only because H2 was classified as ambiguity-dependent in Section~\ref{sec:hyp}.
+
+\paragraph{The five checks.}
+\begin{lstlisting}
+buf = io.StringIO(); sys.stdout = buf; import azure.ai.evaluation as ev; sys.stdout = old
+print("C1 import-time output:", repr(buf.getvalue().strip()[:80]))
+try: ev.AIAgentConverter; print("C2 attribute access -> resolved")
+except ImportError as e: print("C2 attribute access -> ImportError:", str(e)[:60])
+except AttributeError: print("C2 attribute access -> AttributeError")
+try: print("S1 hasattr(module,'AIAgentConverter') ->", hasattr(ev, "AIAgentConverter"))
+except Exception as e: print("S1 hasattr -> raises", type(e).__name__)
+try: ns = {}; exec("from azure.ai.evaluation import *", ns); print("S2 import * -> ok")
+except Exception as e: print("S2 import * -> raises", type(e).__name__)
+print("S3 'AIAgentConverter' in __all__:", "AIAgentConverter" in ev.__all__)
+\end{lstlisting}
+
+\paragraph{Before and after.} Run at the merge commit, then with the two \code{\_\_init\_\_.py} files checked out from \code{d76b8ba34\textasciitilde1}.
+\begin{center}\small
+\begin{tabularx}{\textwidth}{l X X l}
+\toprule
+Check & Before the PR (parent) & After the PR (merge commit) & Claim \\
+\midrule
+C1 stdout during import & \code{[INFO] Could not import AIAgentConverter\ldots} & (nothing) & (a) supported \\
+C2 \code{ev.AIAgentConverter} & \code{AttributeError} & \code{ImportError} with install hint & (c),(d) supported \\
+S1 \code{hasattr(ev, "AIAgentConverter")} & \code{False} & \textbf{raises \code{ImportError}} & (b) not supported \\
+S2 \code{from azure.ai.evaluation import *} & succeeds & \textbf{raises \code{ImportError}} & (b) not supported \\
+S3 \code{"AIAgentConverter" in \_\_all\_\_} & \code{False} & \code{True} & the cause \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{Reading the result.} The mechanism works as described for the reading of ``use'' the agent had in mind. It fails for two readings it did not have in mind, and the failure is not a message but an exception: any module that does \code{from azure.ai.evaluation import *} without the optional extra installed now cannot be imported at all, and \code{hasattr}, whose contract is to return \code{False} for absent attributes, raises instead. S3 identifies the single cause: the names are in \code{\_\_all\_\_}, so \code{import *} requests each of them, \code{\_\_getattr\_\_} is invoked, and the lazy import raises.
+
+\section{Triage}
+The triage rules are applied in order.
+\begin{description}[nosep]
+  \item[Confirmed defect?] Yes. The behaviour at the merge commit contradicts the PR's own stated intent (claim (b)) and a standard-library contract (\code{hasattr}); it is reproduced by a script with a before/after comparison.
+  \item[Escaped?] Yes. CI was green at merge; no review comment mentions \code{\_\_all\_\_}, \code{import *} or \code{hasattr}; the defect is present in the merged code.
+  \item[Failure mode.] Assumption injection: the agent resolved ``how is this package imported?'' in favour of explicit attribute access and encoded that assumption in \code{\_\_all\_\_} without stating it.
+  \item[Severity.] Major: a user-visible failure (\code{import *} cannot be executed) for every user without the optional extra, on a \musthold\ hypothesis.
+  \item[Second finding.] Evidence gap: 0/20 mutants killed; the PR's tests test a copy of the mechanism and are skipped where the behaviour is observable.
+  \item[Not evaluated.] Behaviour with the dependency installed; the \code{red\_team} change (a \code{print} turned into a \code{raise}, which makes \code{import azure.ai.evaluation.red\_team} fail without \code{pyrit}; arguably a second instance of the same pattern, not examined).
+\end{description}
+\note{This triage was performed by one analyst and is recorded in \code{results/evidence/pr41852\_G4.json}; an independent triage is required before it is cited.}
+
+\section{Downstream confirmation}
+After triage, the repository's later history was searched for a fix. Two observations:
+\begin{lstlisting}[language=bash]
+git show main:sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/__init__.py | grep -n '"AIAgentConverter"'
+# names appear only inside the _create_lazy_import(...) calls; no longer in __all__
+# __getattr__ and _lazy_imports are still present
+\end{lstlisting}
+Someone had removed exactly the two lines and nothing else. A GitHub search for merged PRs mentioning the converter found it:
+
+\begin{quote}
+\textbf{PR \#42313}, opened by a maintainer, merged 2025-07-31: ``[evaluation] fix: Remove lazy imports from \code{\_\_all\_\_}''. Description: ``This pull request removes `lazy imports' from \code{\_\_all\_\_} to unblock a release gate that tries to import everything from \code{\_\_all\_\_} (which fails since we raise an ImportError).''
+\end{quote}
+
+Seventeen days elapsed between the agent's merge and the fix. The project's release gate is, functionally, check S2 executed late and expensively, at release time rather than at merge time. Nothing about the fix disputes the agent's change in any other respect; the mechanism stayed.
+
+\section{The claim--evidence--limitation statement}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{X X X}
+\toprule
+\textbf{Claim} & \textbf{Evidence} & \textbf{Limitations} \\
+\midrule
+Importing \code{azure.ai.evaluation} no longer prints when the optional converters are unavailable, and direct attribute access to a converter raises an informative \code{ImportError}.\newline\emph{Scope:} explicit attribute access. &
+G4 C1 and C2, before/after.\newline G1 pass (49 lines).\newline 41 tests green at the merge commit. &
+\code{from azure.ai.evaluation import *} and \code{hasattr()} raise \code{ImportError} when the dependency is absent (confirmed defect; fixed downstream in \#42313).\newline The mechanism has no test protection: 0/20 mutants killed; the PR's tests exercise a copy.\newline Behaviour with the dependency installed not evaluated.\newline \code{red\_team} import behaviour changed and not evaluated. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+The scope line and the first limitation say the same thing from two sides, which is the correspondence rule: everything outside the claim's scope must appear as a limitation. Had this statement accompanied the PR, the reviewer would have seen ``scope: explicit attribute access'' next to a diff that adds names to \code{\_\_all\_\_}, and the question would have asked itself.
+
+\section{What each gate contributed, and what it cost}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+Gate & Contribution & Cost \\
+\midrule
+G1 & Ruled out hallucinated interfaces; on record & seconds \\
+G2/G3 & Showed the must-hold mechanism is undefended (0/20), which made G4 mandatory & $\approx$1 min machine \\
+G4 & Found the defect (S1, S2) and its cause (S3) & $\approx$25 min analyst \\
+Downstream search & Confirmed it against the project's own history & $\approx$10 min analyst \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{The counterfactual.} Could conventional practice have caught this? The pipeline reported that the agent's tests passed, and they did: they pass for any \code{\_\_init\_\_.py}. Static analysis has no rule against putting a name in \code{\_\_all\_\_}. The reviewer read a fluent description whose ``After'' line answered the only question worth asking, and the diff comment ``so they appear as available'' reads as a feature. What found the defect was treating the description's claims as hypotheses, classifying the one that carried the risk as must-hold and ambiguity-dependent, and then enumerating the readings of the ambiguity. The project found it too, by waiting for a release gate to fail.
+
+\section{Reproduction}
+With the replication package (\code{replication/}) set up as described in its README:
+\begin{lstlisting}[language=bash]
+python run_experiments.py run --prs 41852            # G1, G2/G3, G4; writes evidence/pr41852_*.json and pr41852_G4_output.txt
+cat evidence/pr41852_G4_output.txt                     # the before/after table of Section 6
+python run_experiments.py compare --prs 41852          # G1/G2/G3 records against results/evidence/
+\end{lstlisting}
+The precondition (\code{azure-ai-projects} absent) is checked by the runner before the PR is started.
+
+\section*{Notes on method}
+Two points of honesty belong here. First, the earliest claim check written in this study (for a different PR, \#44844) used a hypothetical call sequence and was replaced by the production caller's actual sequence before its finding was accepted; the discipline in Section~\ref{sec:g4} of deriving checks from the description and from real usage idioms, rather than from what seemed plausible, follows from that correction. Second, every judgment in Sections~\ref{sec:hyp} and~7 is currently the assistant's; the human rater's classification and an independent triage are listed in the methodology document as prerequisites for citation.
+
+\end{document}

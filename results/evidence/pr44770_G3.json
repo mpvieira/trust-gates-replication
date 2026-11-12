@@ -1,0 +1,178 @@
+{
+  "gate_id": "G3",
+  "gate_type": "own_suite_sensitivity",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "44770",
+    "commit": "9a8a19a39",
+    "files": [
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/aio/routing_map_provider.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/routing_map_provider.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_synchronized_request.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_asynchronous_request.py"
+    ]
+  },
+  "exercised": [
+    "34 mutants; PR-authored/modified tests only: ['test_routing_map_provider.py', 'test_partition_split_retry_unit.py', 'test_partition_split_retry_unit_async.py']"
+  ],
+  "assumptions": [
+    "baseline suite green at 9a8a19a39 (tests/test_partition_split_retry_unit.py tests/test_partition_split_retry_unit_async.py tests/routing/test_routing_map_provider.py tests/test_base_unit.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L157: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L171: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L178: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L180: str 'sub_status' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L180: str 'N/A' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L188: False -> True"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L196: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/aio/base_execution_context.py",
+      "mutant": "L199: return X -> return None"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L155: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L169: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L176: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L178: str 'sub_status' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L178: str 'N/A' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L186: False -> True"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L194: str 'Partition split retr' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py",
+      "mutant": "L197: return X -> return None"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/aio/routing_map_provider.py",
+      "mutant": "L87: str 'PK range cache (asyn' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/aio/routing_map_provider.py",
+      "mutant": "L91: str '_internal_pk_range_f' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/aio/routing_map_provider.py",
+      "mutant": "L91: True -> False"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/aio/routing_map_provider.py",
+      "mutant": "L105: str 'PK range cache (asyn' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/routing_map_provider.py",
+      "mutant": "L73: str 'PK range cache: Init' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/routing_map_provider.py",
+      "mutant": "L77: str '_internal_pk_range_f' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/routing_map_provider.py",
+      "mutant": "L77: True -> False"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_routing/routing_map_provider.py",
+      "mutant": "L90: str 'PK range cache: Cach' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_synchronized_request.py",
+      "mutant": "L90: str '_internal_pk_range_f' -> mutated"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_asynchronous_request.py",
+      "mutant": "L60: str '_internal_pk_range_f' -> mutated"
+    }
+  ],
+  "not_evaluated": [
+    "whether PR tests were AI-generated alongside the code (assumed: same author)",
+    "equivalent mutants"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:31:00Z",
+  "own_suite_detection_rate": 0.24,
+  "machine_time_s": 48.2,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "Partition split handling does not recurse infinitely on a 410",
+      "source": "rater"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "gate_id": "G1",
+  "gate_type": "interface_reality",
+  "linked_hypothesis_ids": [
+    "H0"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "44844",
+    "commit": "7d26b949",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py"
+    ]
+  },
+  "exercised": [
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py: pyflakes undefined-name scan, restricted to 25 changed lines",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py: 8 module-attribute references on changed lines resolved against installed modules"
+  ],
+  "assumptions": [
+    "package installed in the analysis environment at the PR's own dependency pins",
+    "attribute existence checked against the installed module, not the version pinned in CI"
+  ],
+  "result": "pass",
+  "findings": [],
+  "not_evaluated": [
+    "method calls on objects of inferred type (no type inference performed)",
+    "HTTP endpoints, service API versions, and config keys referenced as strings",
+    "packages added to manifests (checked by pip install, not by this gate)"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T20:46:21Z",
+  "machine_time_s": 0.1,
+  "hypotheses": {
+    "H0": {
+      "category": "must-hold",
+      "statement": "The change references only modules, symbols and attributes that exist (no hallucinated interfaces)",
+      "source": "standing"
+    }
+  }
+}

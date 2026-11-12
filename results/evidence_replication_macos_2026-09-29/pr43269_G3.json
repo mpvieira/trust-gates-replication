@@ -1,0 +1,39 @@
+{
+  "gate_id": "G3",
+  "gate_type": "own_suite_sensitivity",
+  "linked_hypothesis_ids": [],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "43269",
+    "commit": "7e59645b2",
+    "files": [
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_cosmos_client_connection.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_read_items_helper.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_container.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client_connection_async.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/container.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/cosmos_client.py"
+    ]
+  },
+  "exercised": [
+    "none: PR added or modified no test files"
+  ],
+  "assumptions": [
+    "baseline suite green at 7e59645b2 (tests/test_base_unit.py tests/test_session_token_unit.py tests/routing/test_routing_map_provider.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "no_pr_tests",
+  "findings": [],
+  "not_evaluated": [
+    "own-suite sensitivity: PR shipped without tests; only pre-existing tests exercised the change"
+  ],
+  "tool_versions": {
+    "python": "3.12.4"
+  },
+  "timestamp": "2026-09-29T23:56:30Z",
+  "machine_time_s": 5.7,
+  "hypotheses": {}
+}

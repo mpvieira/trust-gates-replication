@@ -1,0 +1,6 @@
+  _indirect_attack_simulator.py L200: IsNot -> Is                             suite=SURVIVED own=SURVIVED
+  _indirect_attack_simulator.py L200: negate if-condition                     suite=SURVIVED own=SURVIVED
+  _simulator.py L168: IsNot -> Is                             suite=SURVIVED own=SURVIVED
+  _simulator.py L168: and<->or                                suite=SURVIVED own=SURVIVED
+  _simulator.py L168: negate if-condition                     suite=SURVIVED own=SURVIVED
+{"mutants": 5, "mutation_score": 0.0, "own_rate": 0.0, "own_tests": ["test_safety_evaluation.py"]}

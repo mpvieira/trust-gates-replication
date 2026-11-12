@@ -1,0 +1,199 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage[colorlinks,linkcolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,
+  framerule=0.3pt,rulecolor=\color{black!40},xleftmargin=4pt,showstringspaces=false,language=Python,literate={`}{\textasciigrave}1}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\musthold}{\textsc{must-hold}}
+\newcommand{\mayfail}{\textsc{may-fail}}
+\newcommand{\cannot}{\textsc{cannot-guarantee}}
+\newcommand{\card}[1]{\clearpage\section{#1}}
+\newcommand{\sub}[1]{\paragraph{#1}}
+\setlist{nosep}
+
+\title{Case Cards: Trust Gates on Six Copilot-Agent Pull Requests\\
+\large \code{Azure/azure-sdk-for-python}}
+\author{Supplement to \emph{Engineering Trust When AI Writes Your Software}}
+\date{Evidence gathered 2026-09-28/29}
+
+\begin{document}
+\maketitle
+
+\noindent Two pull requests from the case study have full walkthroughs (\#41852 and \#44844, separate supplements). This document gives the remaining six in a fixed one-page format: the task and change; requirements with the two classification questions and the resulting level; the gate results; the claim checks with their before/after values; the triage decision; and the claim--evidence--limitation statement. Each card is the record behind one row of Table~1 in the article. All raw outputs are in \code{results/evidence/}, and each card can be regenerated with \code{python run\_experiments.py run --prs <N>}.
+
+\medskip
+\noindent\textbf{Levels.} \musthold: violation unacceptable; strongest evidence owed. \mayfail: deviation tolerable if detected. \cannot: cannot be promised; state the limit. \textbf{Q1}: would violation be a security, safety, integrity or compliance failure, or make the artifact unfit? \textbf{Q2}: does correctness depend on an ambiguity, unobservable state, open-ended completeness, or an absent reference? Q1 yes $\to$ must-hold; else Q2 yes $\to$ cannot-guarantee; else may-fail. Both answers recorded.
+
+\medskip
+\noindent\textbf{Gates.} G1 interface resolution, serving the standing hypothesis H0 (the change references only interfaces that exist; must-hold; attached to every PR and not repeated on the cards); G2 mutants on the changed lines vs.\ the package suite; G3 the same mutants vs.\ the PR's own tests; G4 one check per claim in the PR description, run after and before the PR.
+
+\medskip
+\noindent\textit{Requirements H1, H2, \ldots\ on each card are the independent rater's (RN), extracted and classified from the PR description alone, before seeing any code or result; the reasoning column abridges his. Rows marked \textsuperscript{a} (A1) are requirements the analyst (an AI assistant) extracted and the rater did not; they are not blind, being written after the diffs and gate results had been seen. Triage on these cards is the analyst's.}
+
+% =====================================================================
+\card{PR \#43269 — azure-cosmos: optional \code{max\_concurrency}; \code{create\_database} overloads}
+
+\sub{Task and change.} Two tidy-ups in one PR: make \code{max\_concurrency} of \code{read\_items} optional (\code{None} lets \code{ThreadPoolExecutor} choose), and align the \code{create\_database} overloads (add \code{response\_hook}, drop \code{populate\_query\_metrics}, make \code{offer\_throughput} keyword-only). 140 lines across 8 files. No tests, no changelog entry. Merged 2025-10-09, commit \code{7e59645b2}.
+
+The description says, twice, that the async path is unchanged: ``\textbf{Async path unchanged:} \ldots retains \code{max\_concurrency: int = 10}'' and ``\# Async: Continues to use default of 10''. The diff changes \code{aio/\_read\_items\_helper\_async.py} from \code{max\_concurrency: int = 10} to \code{Optional[int] = 5} with \code{self.max\_concurrency = max\_concurrency if max\_concurrency and max\_concurrency > 0 else 5}.
+
+\sub{Requirements and hypotheses.}
+\begin{center}\small\begin{tabularx}{\textwidth}{p{0.3\textwidth} l l l X}
+\toprule & Q1 & Q2 & Level & Reasoning \\ \midrule
+H1 sync SDK uses the executor default when \code{max\_concurrency} is unspecified & no & no & \mayfail\ H1 & no security or similar problem; described well enough to test \\
+H2 \code{create\_database} overloads accept \code{response\_hook} & no & no & \mayfail\ H2 & not security-related; testable against the API signature \\
+H3 overloads drop the deprecated \code{populate\_query\_metrics} & no & no & \mayfail\ H3 & as H2 \\
+H4 \code{offer\_throughput} keyword-only in sync overloads & no & no & \mayfail\ H4 & not security-related; easy to test by calling both ways \\
+\emph{A1 async behaviour unchanged, as the description states} \textsuperscript{a} & yes & no & \musthold\ A1 & the description promises it; a silent default change breaks existing callers \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Gate results.} G1 pass (all references resolve; BOM-prefixed files handled). G2: 9 mutants on the changed lines (the async default \code{5$\to$6}, \code{and$\to$or}, \code{>$\to$>=}, the sync default string, the hook-invocation condition), \textbf{0 killed}; the offline unit tests do not reach any of the changed code. G3 not applicable: no PR tests.
+
+\sub{G4 checks.}
+\begin{center}\small\begin{tabularx}{\textwidth}{X l l X}
+\toprule Check & Before & After & Claim \\ \midrule
+Async helper signature default & 10 & \textbf{5} & ``async unchanged'' not supported \\
+Async effective value when omitted & 10 & \textbf{5} & same \\
+Same, on \code{main} 2026-09-28 & --- & 5 & still present \\
+\code{create\_database} calls \code{response\_hook(headers)} & (no hook) & yes, one argument & supported; the new docstring types it as a two-argument callable \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Triage.} \textbf{Confirmed defect}, claim--implementation divergence, severity minor: the description asserts the async path is unchanged; the code halves the async default, with no changelog. Escaped (CI green, no review comment). Reported to the project as issue \#49273 on 2026-09-30; confirmed by the Cosmos maintainer, who wrote that the reduction to 5 was intended (made between the 4.14 betas and 4.14.0) but that the changelog entry had been missed and ``the Copilot PR description is also wrong''. The \#43269 description was corrected and PR \#49306 added the 4.14.0 release note and the async docstring; the issue was closed as completed by \#49306. The \code{response\_hook} docstring mismatch was acknowledged and left out of scope. Evidence gap: 0/9, no tests. Not evaluated: throughput effect of the halved default; typing checks on the overloads.
+
+\sub{CEL.} \emph{Claim:} sync \code{read\_items} accepts \code{max\_concurrency=None}; \code{create\_database} invokes \code{response\_hook}. \emph{Scope:} sync path; hook call with one argument. \emph{Evidence:} static inspection of both call sites (G4); G1 pass. \emph{Limitations:} async default changed 10$\to$5 contrary to the description (confirmed; on \code{main}); no test covers any changed line (0/9); docstring/implementation mismatch on the hook signature.
+
+% =====================================================================
+\card{PR \#46707 — azure-confidentialledger: \code{assert} $\to$ explicit \code{ValueError} in receipt verification}
+
+\sub{Task and change.} Following an internal incident (IcM link in the PR), replace every \code{assert} in receipt-content validation with an explicit check raising \code{ValueError("The receipt content is invalid.")}, and raise \code{ValueError} for non-EC certificates. 54 lines in one file. No tests changed. Merged 2026-05-05, commit \code{53dcd778}.
+
+\sub{Requirements and hypotheses.}
+\begin{center}\small\begin{tabularx}{\textwidth}{p{0.3\textwidth} l l l X}
+\toprule & Q1 & Q2 & Level & Reasoning \\ \midrule
+H1 \code{assert}s replaced with explicit checks raising \code{ValueError} & no & yes & \cannot\ H1 & the description does not say whether the change is cosmetic or security-motivated (Q1), nor when the checks fire (Q2) \\
+\emph{A1 malformed receipts are rejected, including under \code{python -O}} \textsuperscript{a} & yes & no & \musthold\ A1 & acceptance of a bad receipt defeats verification; \code{-O} strips \code{assert} \\
+\bottomrule\end{tabularx}\end{center}
+The rater, working from the four-line description, could not tell whether the change mattered for security and classified it cannot-guarantee; the requirement it protects (A1) is a security property, which only the incident reference and the code reveal.
+
+\sub{Gate results.} G1 pass. G2: 46 mutants, \textbf{42 killed} (0.91) by the 67 existing receipt tests. Survivors: L143 \code{"right"} string and \code{in$\to$not in} on the right operand; L147 \code{"right"} string; L381 remove \code{raise} (non-EC certificate). G3 n/a (no PR tests).
+
+\sub{G4 checks.} Five inputs through \code{\_validate\_receipt\_content} / \code{\_load\_and\_verify\_pem\_certificate}, under \code{python} and \code{python -O}, at merge commit and parent. \code{grep} for \code{assert} in the file: 0 after the PR.
+\begin{center}\small\begin{tabular}{l c c c c}
+\toprule Input & Parent & Parent \code{-O} & PR & PR \code{-O} \\ \midrule
+missing \code{signature} & ValueError & \textbf{accepted} & ValueError & ValueError \\
+proof element with neither \code{left} nor \code{right} & ValueError & \textbf{accepted} & ValueError & ValueError \\
+\code{right} not a string & ValueError & \textbf{accepted} & ValueError & ValueError \\
+valid right-only element & accepted & accepted & accepted & accepted \\
+RSA (non-EC) certificate & ValueError & \textbf{accepted} & ValueError & ValueError \\
+\bottomrule\end{tabular}\end{center}
+
+\sub{Triage.} No defect attributed to the PR; the claim holds and closes a real gap in a security property (A1). \textbf{Two undocumented limitations}: (1) nothing in CI runs under \code{-O}, so the property the PR restores has no regression protection and a future revert to \code{assert} passes; (2) the right-sibling proof path and the non-EC certificate path are never exercised by the suite, so the PR's conversion of those checks is unverified (the four survivors). Not evaluated: the cryptographic verification itself (unchanged); live-ledger receipts.
+
+\sub{CEL.} \emph{Claim:} receipt validation rejects the malformed classes exercised, with or without assert stripping. \emph{Scope:} left-sibling proofs, EC certificates. \emph{Evidence:} G4 table; 42/46 mutants killed; 67 tests green. \emph{Limitations:} right-sibling and non-EC paths unverified; no \code{-O} regression test; live receipts not tested.
+
+% =====================================================================
+\card{PR \#41492 — azure-ai-evaluation: \code{int()} $\to$ \code{float()} in threshold comparison}
+
+\sub{Task and change.} \code{MeteorScoreEvaluator} with threshold 0.5 and score 0.9375 reported \code{fail}, because \code{\_base\_eval.py} compared \code{int(score\_value)} to the threshold. Two lines changed (\code{int} $\to$ \code{float} in both the higher-is-better and lower-is-better branches), a version bump, and 47 new test lines for Meteor and Bleu with decimal thresholds. Merged 2025-06-10, commit \code{0c347e994}.
+
+\sub{Requirements and hypotheses.}
+\begin{center}\small\begin{tabularx}{\textwidth}{p{0.3\textwidth} l l l X}
+\toprule & Q1 & Q2 & Level & Reasoning \\ \midrule
+H1 correct pass/fail for decimal scores, higher- and lower-is-better & yes & no & \musthold\ H1 & an incorrect comparison gives incorrect results \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Gate results.} G1 pass. G2 = G3 (the PR's file is the only test of the branch): 5 mutants, 1 killed (L419 negate). Survivors: L419 \code{>=$\to$>}; L424 \code{<=$\to$<}; L424 negate (the entire lower-is-better branch); a version-string mutant (equivalent, excluded; reported as 1/4).
+
+\sub{G4 checks.}
+\begin{center}\small\begin{tabularx}{\textwidth}{X l l X}
+\toprule Check & Before & After & Claim \\ \midrule
+C2 \code{F1ScoreEvaluator}, score 0.800 vs threshold 0.5 & fail & pass & ``other score-based evaluators benefit'' supported \\
+C3 synthetic lower-is-better, score 2.5 vs threshold 2 & \textbf{pass (wrong)} & fail & ``both branches'' supported, untested by PR \\
+C3 score 0.4 vs 0.5; score 2.0 vs 2 & pass; pass & pass; pass & --- \\
+C4 score == threshold (higher-is-better) & fail & pass & boundary now correct; untested \\
+R score \code{"N/A"} & swallowed & swallowed & pre-existing: \code{except: print()} \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Triage.} No defect attributed. \textbf{Two undocumented limitations}: the lower-is-better branch had the inverse bug (2.5 against threshold 2 reported \code{pass}) and is fixed, but no PR test exercises it and its negate mutant survives; the equality boundary is untested. Evidence gap (pre-existing): non-numeric scores are silently swallowed and produce no \code{\_result} key. Not evaluated: content-safety evaluators against the live service; rouge keys (excluded from the loop).
+
+\sub{CEL.} \emph{Claim:} threshold comparison uses the float score; higher-is-better evaluators pass at and above the threshold. \emph{Scope:} numeric scores; higher-is-better branch as tested. \emph{Evidence:} G4 C2/C4; PR tests (18); G1 pass. \emph{Limitations:} lower-is-better fix unprotected by tests; boundary untested; non-numeric scores silently dropped.
+
+% =====================================================================
+\card{PR \#44770 — azure-cosmos: port of hotfix \#44649 (partition-split recursion)}
+
+\sub{Task and change.} Port a human-authored hotfix from a release branch to \code{main}. The hotfix stops an infinite recursion when a partition-key-range fetch itself hits a 410 (partition split): the routing-map provider sets a private flag \code{\_internal\_pk\_range\_fetch}, the request layer pops it before the HTTP call, and the execution context skips its retry loop when the flag is set; state (\code{\_has\_started}, \code{\_continuation}) is reset on retry; logging added. Six source files, sync and async; two new unit-test files (328 + 317 lines). Merged 2026-01-22, commit \code{9a8a19a39}.
+
+\sub{Requirements and hypotheses.}
+\begin{center}\small\begin{tabularx}{\textwidth}{p{0.3\textwidth} l l l X}
+\toprule & Q1 & Q2 & Level & Reasoning \\ \midrule
+H1 partition-split handling does not recurse infinitely on a 410 & yes & no & \musthold\ H1 & infinite recursion makes the operation fail instead of handling the split \\
+\emph{A1 the port matches the hotfix \#44649} \textsuperscript{a} & yes & no & \musthold\ A1 & a divergent port ships an untested variant \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Gate results.} G1 pass. G2 = G3: 34 mutants, \textbf{8 killed} (0.24), identically by suite and PR tests. Killed: the execution-context guard in sync and async (flag key string, \code{False$\to$True} default, negate, \code{return None}). Survived: every log-message string (cosmetic); \code{\_has\_started = False$\to$True} in sync and async (the state reset); \code{return []$\to$None} at the unreachable loop exit; \code{\_internal\_pk\_range\_fetch: True$\to$False} and its key string in both routing-map providers; the key string of the \code{pop} in both request layers.
+
+\sub{G4 check (port fidelity).} \code{git fetch origin pull/44649/head:pr44649}, then \code{git diff pr44649 9a8a19a39} per file:
+\begin{center}\small\begin{tabularx}{\textwidth}{X X}
+\toprule File & Difference between hotfix and port \\ \midrule
+\code{\_execution\_context/base\_execution\_context.py} (+ aio) & +4 lines: one \code{\_LOGGER.warning} before the unreachable \code{return []} (requested in review) \\
+\code{\_routing/routing\_map\_provider.py} (+ aio) & identical \\
+\code{\_synchronized\_request.py}, \code{aio/\_asynchronous\_request.py} & differ only by unrelated \code{main} drift (hedging); \code{kwargs.pop("\_internal\_pk\_range\_fetch", None)} present in both versions of both files \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Triage.} No defect; port claim supported. \textbf{Two undocumented limitations}: the state reset is untested (its mutants survive in sync and async); the flag is untested at the provider and request layers, so only the execution-context half of the anti-recursion mechanism is covered by the 645 lines of tests the PR shipped. Not evaluated: behaviour against a live account during an actual split; async test collection count.
+
+\sub{CEL.} \emph{Claim:} the port reproduces \#44649; the execution context skips retry when the internal flag is set. \emph{Scope:} execution-context guard. \emph{Evidence:} G4 diff; 8/34 mutants killed on the guard; PR unit tests. \emph{Limitations:} state reset and provider/request-layer flag handling untested; live split behaviour not evaluated.
+
+% =====================================================================
+\card{PR \#42047 — azure-ai-evaluation: randomization seed across simulators}
+
+\sub{Task and change.} Users reported that two runs of a safety evaluation with the same \code{randomization\_seed} produced different query sets (different counts). The PR forwards the seed from \code{\_SafetyEvaluation} to \code{Simulator}, replaces \code{random.seed()} in \code{AdversarialSimulator} with a local \code{random.Random(seed)}, and adds the parameter to \code{IndirectAttackSimulator} and \code{Simulator}. 48 new test lines. Merged 2025-07-17, commit \code{54d45994a}.
+
+\sub{Requirements and hypotheses.}
+\begin{center}\small\begin{tabularx}{\textwidth}{p{0.3\textwidth} l l l X}
+\toprule & Q1 & Q2 & Level & Reasoning \\ \midrule
+H1 the same seed always returns the same query sets & yes & no & \musthold\ H1 & different sets defeat the seed's purpose and invalidate experiments; testable from the description \\
+H2 a seeded run does not modify the global random state & yes & no & \musthold\ H2 & interference with global state makes other results irreproducible \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Gate results.} G1 pass. G2 = G3: 5 mutants (\code{is not$\to$is} and negate on the seed guards in two files; \code{and$\to$or}), \textbf{0 killed}. The two new tests instantiate \code{random.Random(seed)}, shuffle a list twice and compare; they never construct a simulator.
+
+\sub{G4 (static; the simulators need the RAI service).}
+\begin{center}\small\begin{tabularx}{\textwidth}{X l}
+\toprule Check & Result \\ \midrule
+Seed forwarded to \code{Simulator} in \code{\_safety\_evaluation.py} & yes (diff line) \\
+Local \code{Random} used for template shuffling & yes; the unseeded branch still calls global \code{random.shuffle} \\
+Result collection order & \code{asyncio.as\_completed}: completion order, regardless of seed \\
+Row-count logic touched by the PR & no: \code{min(total\_tasks, max\_simulation\_results)} unchanged \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Triage.} \textbf{Possible claim divergence, not confirmed}: the description's root cause (unseeded shuffling) does not obviously explain the reported symptom (different counts), and ordering is non-deterministic by construction; only a live run can confirm or refute the ``identical query sets'' claim. Recorded as a limitation pending that run; if it cannot be run, the row in Table~1 should say ``limitation'' only. Evidence gap: 0/5; the tests exercise the standard library. Not evaluated: live simulation; determinism of returned order.
+
+\sub{CEL.} \emph{Claim:} the seed is threaded through all three simulators and template selection uses a seeded local generator. \emph{Scope:} template selection; not result order or count. \emph{Evidence:} static inspection (G4); G1 pass. \emph{Limitations:} query-set identity and the count symptom unverified; 0/5 mutants killed; global-state claim unverified at runtime.
+
+% =====================================================================
+\card{PR \#45366 — azure-core: \code{format\_url} trailing slash (tooling smoke test)}
+
+\sub{Task and change.} A base URL ending in \code{/} lost the slash when the URL template was query-only. One line: \code{.rstrip("/")} removed from \code{PipelineClientBase.format\_url}; one new test reproducing the issue's exact input. Merged 2026-03-02, commit \code{41391f1e}.
+
+\sub{Requirements and hypotheses.}
+\begin{center}\small\begin{tabularx}{\textwidth}{p{0.3\textwidth} l l l X}
+\toprule & Q1 & Q2 & Level & Reasoning \\ \midrule
+H1 query-only \code{format\_url} templates preserve the trailing slash & yes & no & \musthold\ H1 & a changed URL can address a different resource \\
+\bottomrule\end{tabularx}\end{center}
+
+\sub{Gate results.} G1 pass (1 changed line). G2: \textbf{0 mutants}. The changed line only deletes a call and contains no node the nine operators apply to; the mutator's lack of a statement-deletion or call-removal operator is a documented limitation. G3 n/a. G4 not run: the PR's own test is the issue's scenario and passes.
+
+\sub{Triage.} No findings. The PR is below the study's size threshold and is retained in Table~1 only as an end-to-end check of the tooling; its row makes no claim.
+
+\sub{CEL.} \emph{Claim:} \code{format\_url} preserves a trailing slash when the template is query-only. \emph{Scope:} that input class. \emph{Evidence:} PR test; G1 pass. \emph{Limitations:} no mutation evidence (tooling limitation); other URL shapes not exercised.
+
+\end{document}

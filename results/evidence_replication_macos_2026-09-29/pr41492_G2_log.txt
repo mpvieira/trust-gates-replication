@@ -1,0 +1,6 @@
+  _base_eval.py L419: GtE -> Gt                               suite=SURVIVED own=SURVIVED
+  _base_eval.py L419: negate if-condition                     suite=K own=K
+  _base_eval.py L424: LtE -> Lt                               suite=SURVIVED own=SURVIVED
+  _base_eval.py L424: negate if-condition                     suite=SURVIVED own=SURVIVED
+  _version.py L6: str '1.9.0' -> mutated                    suite=SURVIVED own=SURVIVED
+{"mutants": 5, "mutation_score": 0.2, "own_rate": 0.2, "own_tests": ["test_threshold_behavior.py"]}

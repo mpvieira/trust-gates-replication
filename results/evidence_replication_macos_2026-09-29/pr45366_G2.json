@@ -1,0 +1,43 @@
+{
+  "gate_id": "G2",
+  "gate_type": "test_independence_mutation",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "45366",
+    "commit": "41391f1e7b5ad52e3d480a7adcbf3fa5b99e2326",
+    "files": [
+      "sdk/core/azure-core/azure/core/pipeline/transport/_base.py"
+    ]
+  },
+  "exercised": [
+    "0 mutants on 1 changed lines across 1 files; full package suite (tests/test_pipeline.py tests/test_basic_transport.py)"
+  ],
+  "assumptions": [
+    "baseline suite green at 41391f1e7b5ad52e3d480a7adcbf3fa5b99e2326 (tests/test_pipeline.py tests/test_basic_transport.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "pass",
+  "findings": [],
+  "not_evaluated": [
+    "equivalent-mutant analysis (surviving mutants need manual review)",
+    "lines outside the PR diff",
+    "mutation operators beyond the 9 implemented (no statement deletion, no call-argument mutation)"
+  ],
+  "tool_versions": {
+    "python": "3.12.4"
+  },
+  "timestamp": "2026-09-29T23:59:22Z",
+  "mutation_score": null,
+  "mutants": [],
+  "machine_time_s": 3.4,
+  "hypotheses": {
+    "H1": {
+      "category": "may-fail",
+      "statement": "format_url preserves a trailing slash when the template is query-only"
+    }
+  }
+}

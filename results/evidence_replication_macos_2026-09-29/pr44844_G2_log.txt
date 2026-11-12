@@ -1,0 +1,14 @@
+  _logging.py L174: negate if-condition                     suite=SURVIVED own=SURVIVED
+  _logging.py L181: True -> False                           suite=SURVIVED own=SURVIVED
+  _logging.py L178: negate if-condition                     suite=SURVIVED own=SURVIVED
+  _logging.py L263: IsNot -> Is                             suite=K own=K
+  _logging.py L263: 0 -> 1                                  suite=SURVIVED own=SURVIVED
+  _logging.py L263: return X -> return None                 suite=K own=K
+  _logging.py L282: IsNot -> Is                             suite=SURVIVED own=SURVIVED
+  _logging.py L282: negate if-condition                     suite=SURVIVED own=SURVIVED
+  _logging.py L294: In -> NotIn                             suite=K own=K
+  _logging.py L295: return X -> return None                 suite=SURVIVED own=SURVIVED
+  _logging.py L294: negate if-condition                     suite=K own=K
+  _logging.py L298: IsNot -> Is                             suite=K own=K
+  _logging.py L298: return X -> return None                 suite=K own=K
+{"mutants": 13, "mutation_score": 0.46, "own_rate": 0.46, "own_tests": ["test_logging.py"]}

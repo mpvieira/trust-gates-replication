@@ -1,0 +1,68 @@
+{
+  "gate_id": "G4",
+  "gate_type": "claim_implementation_correspondence",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "41492",
+    "commit": "0c347e994",
+    "files": [
+      "azure/ai/evaluation/_evaluators/_common/_base_eval.py"
+    ]
+  },
+  "exercised": [
+    "C2 F1 evaluator with fractional score 0.8 vs threshold 0.5: parent -> fail, PR -> pass",
+    "C3 synthetic lower-is-better evaluator, score 2.5 vs threshold 2: parent -> pass (wrong), PR -> fail",
+    "C4 boundary score == threshold: parent -> fail, PR -> pass",
+    "R non-numeric score: both versions swallow the exception via print(); no _result key emitted"
+  ],
+  "assumptions": [],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "undocumented_limitation",
+      "detail": "lower-is-better branch (used by content-safety evaluators) had the inverse defect: 2.5 <= 2 reported as pass before the PR; fixed, but no PR test exercises it and the negate-condition mutant survives"
+    },
+    {
+      "kind": "undocumented_limitation",
+      "detail": "equality boundary untested: GtE->Gt and LtE->Lt mutants survive"
+    },
+    {
+      "kind": "evidence_gap",
+      "detail": "pre-existing: non-numeric scores are swallowed with print(); not introduced by the PR"
+    }
+  ],
+  "not_evaluated": [
+    "content-safety evaluators against the live service",
+    "rouge keys, which are excluded from the loop"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:35:05Z",
+  "claims": [
+    {
+      "claim": "MeteorScoreEvaluator returns pass when score exceeds threshold",
+      "status": "supported"
+    },
+    {
+      "claim": "Bleu and other score-based evaluators also benefit",
+      "status": "supported (F1 shown)"
+    },
+    {
+      "claim": "fix affects both higher_is_better and lower_is_better branches",
+      "status": "supported by G4; not tested by the PR"
+    }
+  ],
+  "machine_time_s": 0.0,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "A score-based evaluator returns the correct pass/fail result for decimal scores against the threshold, for both higher- and lower-is-better",
+      "source": "rater"
+    }
+  },
+  "hypothesis_note": "Re-linked 2026-10-02 to the independent rater's classification (H1..Hn) and the analyst's non-blind extra requirements (A1..). Free-text fields below (exercised, claims, findings) were written during triage on 2026-09-28/29 and may refer to the analyst's earlier H-numbering."
+}

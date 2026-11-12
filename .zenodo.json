@@ -1,0 +1,41 @@
+{
+  "title": "Trust gates on agent-authored pull requests: replication package for \"Engineering Trust When AI Writes Your Software\"",
+  "upload_type": "software",
+  "description": "<p>Replication package for the case study in <em>Engineering Trust When AI Writes Your Software</em> (M. Vieira, A. Reddy, V. Devabhaktuni; IEEE Computer, under review). It contains the config-driven runner and four trust gates (interface resolution, mutation on changed lines against the package suite and against the change's own tests, and per-PR claim checks), the configuration for eight Copilot-agent pull requests merged into Azure/azure-sdk-for-python, the evidence records obtained and an independent re-run on a second machine, the independent rater's blind classification of the requirements, full walkthroughs of two pull requests and one-page cards for the other six, the bug reports filed with the project, and the methodology and runbook.</p><p>The gate tooling, claim checks and triage were produced with an AI assistant under the first author's direction and reproduced by the authors; the requirement classification of record was performed by a human rater without AI assistance.</p>",
+  "creators": [
+    {
+      "name": "Vieira, Marco",
+      "affiliation": "University of North Carolina at Charlotte"
+    },
+    {
+      "name": "Reddy, Ajitesh",
+      "affiliation": "University of North Carolina at Charlotte"
+    },
+    {
+      "name": "Devabhaktuni, Vinay",
+      "affiliation": "University of North Carolina at Charlotte"
+    }
+  ],
+  "keywords": [
+    "AI-generated code",
+    "software trust",
+    "coding agents",
+    "mutation testing",
+    "claim checking",
+    "replication package"
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Azure/azure-sdk-for-python",
+      "relation": "references",
+      "scheme": "url"
+    },
+    {
+      "identifier": "10.1145/3793302.3797249",
+      "relation": "references",
+      "scheme": "doi"
+    }
+  ]
+}

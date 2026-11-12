@@ -1,0 +1,63 @@
+{
+  "gate_id": "G4",
+  "gate_type": "claim_implementation_correspondence",
+  "linked_hypothesis_ids": [
+    "H1",
+    "A1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "46707",
+    "commit": "53dcd7783357a76ba374dec23c46ef772865231c",
+    "files": [
+      "azure/confidentialledger/receipt/_receipt_verification.py"
+    ]
+  },
+  "exercised": [
+    "C1 'replace assert with explicit ValueError checks': grep for assert (0 remain); 4 malformed receipts + 1 RSA certificate run through validation under python and python -O, at PR commit and at parent commit",
+    "outcome: at parent under -O all 5 malformed inputs accepted; at PR commit all 5 rejected under both modes"
+  ],
+  "assumptions": [
+    "-O is a realistic deployment mode (the linked IcM incident suggests it was)"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "undocumented_limitation",
+      "detail": "No test runs under -O, so the property the PR restores (validation survives assert stripping) has no regression protection; a future revert to assert would pass CI"
+    },
+    {
+      "kind": "evidence_gap",
+      "detail": "G2 survivors: right-sibling proof path (L143/L147) and non-EC certificate rejection (L381) never exercised by the suite; the PR's conversion of those checks is unverified"
+    }
+  ],
+  "not_evaluated": [
+    "cryptographic verification logic itself (unchanged by PR)",
+    "behaviour on receipts from a live ledger"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T20:49:43Z",
+  "claims": [
+    {
+      "claim": "asserts replaced with explicit ValueError checks",
+      "status": "supported",
+      "evidence": "G4 checks; G2 mutants on 'remove raise' at L120/L165/L188 killed"
+    }
+  ],
+  "machine_time_s": 0.0,
+  "hypotheses": {
+    "H1": {
+      "category": "cannot-guarantee",
+      "statement": "assert statements in _receipt_verification.py are replaced with explicit checks raising ValueError",
+      "source": "rater"
+    },
+    "A1": {
+      "category": "must-hold",
+      "statement": "Malformed receipts are rejected, including under python -O",
+      "source": "analyst"
+    }
+  },
+  "hypothesis_note": "Re-linked 2026-10-02 to the independent rater's classification (H1..Hn) and the analyst's non-blind extra requirements (A1..). Free-text fields below (exercised, claims, findings) were written during triage on 2026-09-28/29 and may refer to the analyst's earlier H-numbering."
+}

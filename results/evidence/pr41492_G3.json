@@ -1,0 +1,64 @@
+{
+  "gate_id": "G3",
+  "gate_type": "own_suite_sensitivity",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "41492",
+    "commit": "0c347e994",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_version.py"
+    ]
+  },
+  "exercised": [
+    "5 mutants; PR-authored/modified tests only: ['test_threshold_behavior.py']"
+  ],
+  "assumptions": [
+    "baseline suite green at 0c347e994 (tests/unittests/test_evaluators)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L419: GtE -> Gt"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L424: LtE -> Lt"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_evaluators/_common/_base_eval.py",
+      "mutant": "L424: negate if-condition"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_version.py",
+      "mutant": "L6: str '1.9.0' -> mutated"
+    }
+  ],
+  "not_evaluated": [
+    "whether PR tests were AI-generated alongside the code (assumed: same author)",
+    "equivalent mutants"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:18:52Z",
+  "own_suite_detection_rate": 0.2,
+  "machine_time_s": 31.6,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "A score-based evaluator returns the correct pass/fail result for decimal scores against the threshold, for both higher- and lower-is-better",
+      "source": "rater"
+    }
+  }
+}

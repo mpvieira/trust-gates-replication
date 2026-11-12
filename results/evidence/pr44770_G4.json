@@ -1,0 +1,56 @@
+{
+  "gate_id": "G4",
+  "gate_type": "claim_implementation_correspondence",
+  "linked_hypothesis_ids": [
+    "A1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "44770",
+    "commit": "9a8a19a39",
+    "files": [
+      "azure/cosmos/_execution_context/base_execution_context.py (+aio)",
+      "azure/cosmos/_routing/routing_map_provider.py (+aio)",
+      "_synchronized_request.py",
+      "aio/_asynchronous_request.py"
+    ]
+  },
+  "exercised": [
+    "git diff pr44649..9a8a19a39 on the six source files: execution contexts differ only by one review-requested warning log; routing-map providers identical; request files differ only by unrelated main-branch drift (hedging); flag pop present in both request layers"
+  ],
+  "assumptions": [],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "undocumented_limitation",
+      "detail": "state reset (_has_started=False, _continuation=None) untested: False->True mutants survive in sync and async"
+    },
+    {
+      "kind": "undocumented_limitation",
+      "detail": "the _internal_pk_range_fetch flag set in routing_map_provider and popped in the request layer is untested at those layers: True->False and key-name mutants survive; only the execution-context guard is covered"
+    }
+  ],
+  "not_evaluated": [
+    "behaviour against a live account during an actual split",
+    "async test file collection count"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:35:05Z",
+  "claims": [
+    {
+      "claim": "all changes from PR #44649 ported",
+      "status": "supported"
+    }
+  ],
+  "machine_time_s": 0.0,
+  "hypotheses": {
+    "A1": {
+      "category": "must-hold",
+      "statement": "The port matches the human hotfix PR #44649",
+      "source": "analyst"
+    }
+  },
+  "hypothesis_note": "Re-linked 2026-10-02 to the independent rater's classification (H1..Hn) and the analyst's non-blind extra requirements (A1..). Free-text fields below (exercised, claims, findings) were written during triage on 2026-09-28/29 and may refer to the analyst's earlier H-numbering."
+}

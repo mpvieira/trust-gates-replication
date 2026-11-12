@@ -1,0 +1,20 @@
+# G4 for PR #41492 at 0c347e994 — 2026-09-29 01:08 UTC
+# expected: after: C2 pass, C3 2.5 vs 2 -> fail, C4 pass; before: C2 fail, C3 -> pass (wrong), C4 fail
+# hypothesis H1 (must-hold): Pass/fail result reflects a float comparison against the threshold
+# hypothesis H2 (must-hold): Lower-is-better evaluators fail when the score exceeds the threshold
+
+## AFTER the PR (merge commit)
+C2 F1 score=0.800 threshold=0.5 -> pass
+C3 lower_is_better score=2.5 threshold=2 -> fail  (correct: fail)
+C3 lower_is_better score=0.4 threshold=0.5 -> pass  (correct: pass)
+C3 lower_is_better score=2.0 threshold=2 -> pass  (correct: pass)
+C4 boundary score==threshold -> pass (correct: pass)
+R  non-numeric score -> result keys: [] (error swallowed by print)
+
+## BEFORE the PR (changed files from parent)
+C2 F1 score=0.800 threshold=0.5 -> fail
+C3 lower_is_better score=2.5 threshold=2 -> pass  (correct: fail)
+C3 lower_is_better score=0.4 threshold=0.5 -> pass  (correct: pass)
+C3 lower_is_better score=2.0 threshold=2 -> pass  (correct: pass)
+C4 boundary score==threshold -> fail (correct: pass)
+R  non-numeric score -> result keys: [] (error swallowed by print)

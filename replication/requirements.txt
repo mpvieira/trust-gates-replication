@@ -1,0 +1,30 @@
+# Python dependencies of the replication runner and of the SDK packages' offline unit tests.
+# Installed by `python run_experiments.py setup` (or: pip install -r requirements.txt).
+pyyaml
+pytest
+pytest-cov
+pytest-mock
+pytest-asyncio
+pytest-trio
+pyflakes
+trio
+requests
+aiohttp
+httpx
+typing-extensions
+packaging
+cryptography
+opentelemetry-sdk~=1.26
+opentelemetry-instrumentation-requests
+# azure-ai-evaluation runtime deps (the package is used via PYTHONPATH, not pip-installed)
+pyjwt>=2.8.0
+nltk>=3.9.1
+azure-storage-blob
+pandas<3
+openai>=1.108.0
+ruamel.yaml
+msrest
+Jinja2
+filelock
+certifi
+truststore

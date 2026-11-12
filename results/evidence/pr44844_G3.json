@@ -1,0 +1,96 @@
+{
+  "gate_id": "G3",
+  "gate_type": "own_suite_sensitivity",
+  "linked_hypothesis_ids": [
+    "H1",
+    "H2",
+    "H3",
+    "H4"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "44844",
+    "commit": "7d26b949",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py"
+    ]
+  },
+  "exercised": [
+    "13 mutants; PR-authored/modified tests only: ['test_logging.py']"
+  ],
+  "assumptions": [
+    "baseline suite green at 7d26b949 (tests/unittests/test_logging.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py",
+      "mutant": "L174: negate if-condition"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py",
+      "mutant": "L181: True -> False"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py",
+      "mutant": "L178: negate if-condition"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py",
+      "mutant": "L263: 0 -> 1"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py",
+      "mutant": "L282: IsNot -> Is"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py",
+      "mutant": "L282: negate if-condition"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_common/_logging.py",
+      "mutant": "L295: return X -> return None"
+    }
+  ],
+  "not_evaluated": [
+    "whether PR tests were AI-generated alongside the code (assumed: same author)",
+    "equivalent mutants"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T20:46:21Z",
+  "own_suite_detection_rate": 0.46,
+  "machine_time_s": 94.8,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "Nested NodeLogManager contexts do not lead to RecursionError during evaluation runs",
+      "source": "rater"
+    },
+    "H2": {
+      "category": "may-fail",
+      "statement": "Chained NodeLogWriter targets are unwrapped with cycle detection",
+      "source": "rater"
+    },
+    "H3": {
+      "category": "cannot-guarantee",
+      "statement": "Unwrapping has a safe fallback to the real streams",
+      "source": "rater"
+    },
+    "H4": {
+      "category": "may-fail",
+      "statement": "Existing NodeLogWriter instances are reused when streams are already wrapped",
+      "source": "rater"
+    }
+  }
+}

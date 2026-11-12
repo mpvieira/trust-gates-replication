@@ -1,0 +1,14 @@
+# G4 for PR #44844 at 7d26b949 — 2026-09-29 23:54 UTC
+# expected: after: outer-after attributed to r2; before: attributed to r1
+# hypothesis H1 (must-hold): Nested NodeLogManager contexts do not recurse
+# hypothesis H2 (must-hold): Per-run log attribution is preserved across a nesting boundary
+
+## AFTER the PR (merge commit)
+r1 log has outer-before=True outer-after=False
+r2 log has inner-line=True outer-after=True   <- misattribution if True
+real stdout got outer-after=False
+
+## BEFORE the PR (changed files from parent)
+r1 log has outer-before=True outer-after=True
+r2 log has inner-line=False outer-after=False   <- misattribution if True
+real stdout got outer-after=False

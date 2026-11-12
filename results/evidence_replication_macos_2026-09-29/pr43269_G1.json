@@ -1,0 +1,62 @@
+{
+  "gate_id": "G1",
+  "gate_type": "interface_reality",
+  "linked_hypothesis_ids": [
+    "H0"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "43269",
+    "commit": "7e59645b2",
+    "files": [
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_cosmos_client_connection.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_read_items_helper.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_container.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client_connection_async.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/container.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/cosmos_client.py"
+    ]
+  },
+  "exercised": [
+    "sdk/cosmos/azure-cosmos/azure/cosmos/_cosmos_client_connection.py: pyflakes undefined-name scan, restricted to 1 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/_cosmos_client_connection.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/_read_items_helper.py: pyflakes undefined-name scan, restricted to 2 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/_read_items_helper.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_container.py: pyflakes undefined-name scan, restricted to 4 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_container.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py: pyflakes undefined-name scan, restricted to 31 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client_connection_async.py: pyflakes undefined-name scan, restricted to 1 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client_connection_async.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py: pyflakes undefined-name scan, restricted to 2 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/container.py: pyflakes undefined-name scan, restricted to 3 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/container.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/cosmos_client.py: pyflakes undefined-name scan, restricted to 29 changed lines",
+    "sdk/cosmos/azure-cosmos/azure/cosmos/cosmos_client.py: 0 module-attribute references on changed lines resolved against installed modules"
+  ],
+  "assumptions": [
+    "package installed in the analysis environment at the PR's own dependency pins",
+    "attribute existence checked against the installed module, not the version pinned in CI"
+  ],
+  "result": "pass",
+  "findings": [],
+  "not_evaluated": [
+    "method calls on objects of inferred type (no type inference performed)",
+    "HTTP endpoints, service API versions, and config keys referenced as strings",
+    "packages added to manifests (checked by pip install, not by this gate)"
+  ],
+  "tool_versions": {
+    "python": "3.12.4"
+  },
+  "timestamp": "2026-09-29T23:56:30Z",
+  "machine_time_s": 0.5,
+  "hypotheses": {
+    "H0": {
+      "category": "must-hold",
+      "statement": "The change references only modules, symbols and attributes that exist (no hallucinated interfaces)"
+    }
+  }
+}

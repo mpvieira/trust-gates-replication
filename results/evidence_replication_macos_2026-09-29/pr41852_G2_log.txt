@@ -1,0 +1,21 @@
+  __init__.py L61: str 'Create a lazy import' -> mutated    suite=SURVIVED own=SURVIVED
+  __init__.py L77: return X -> return None                  suite=SURVIVED own=SURVIVED
+  __init__.py L79: remove raise                             suite=SURVIVED own=SURVIVED
+  __init__.py L83: return X -> return None                  suite=SURVIVED own=SURVIVED
+  __init__.py L86: str 'AIAgentConverter' -> mutated        suite=SURVIVED own=SURVIVED
+  __init__.py L87: str 'AIAgentConverter' -> mutated        suite=SURVIVED own=SURVIVED
+  __init__.py L88: str 'azure.ai.evaluation.' -> mutated    suite=SURVIVED own=SURVIVED
+  __init__.py L89: str 'azure-ai-projects' -> mutated       suite=SURVIVED own=SURVIVED
+  __init__.py L91: str 'SKAgentConverter' -> mutated        suite=SURVIVED own=SURVIVED
+  __init__.py L92: str 'SKAgentConverter' -> mutated        suite=SURVIVED own=SURVIVED
+  __init__.py L93: str 'azure.ai.evaluation.' -> mutated    suite=SURVIVED own=SURVIVED
+  __init__.py L94: str 'semantic-kernel' -> mutated         suite=SURVIVED own=SURVIVED
+  __init__.py L139: str 'AIAgentConverter' -> mutated       suite=SURVIVED own=SURVIVED
+  __init__.py L140: str 'SKAgentConverter' -> mutated       suite=SURVIVED own=SURVIVED
+  __init__.py L147: str 'Handle lazy imports ' -> mutated   suite=SURVIVED own=SURVIVED
+  __init__.py L148: In -> NotIn                             suite=SURVIVED own=SURVIVED
+  __init__.py L149: return X -> return None                 suite=SURVIVED own=SURVIVED
+  __init__.py L148: negate if-condition                     suite=SURVIVED own=SURVIVED
+  __init__.py L150: remove raise                            suite=SURVIVED own=SURVIVED
+  __init__.py L11: remove raise                             suite=SURVIVED own=SURVIVED
+{"mutants": 20, "mutation_score": 0.0, "own_rate": 0.0, "own_tests": ["test_lazy_imports.py"]}

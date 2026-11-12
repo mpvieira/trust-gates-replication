@@ -1,0 +1,35 @@
+  base_execution_context.py L153: str '_internal_pk_range_f' -> mutated   suite=K own=K
+  base_execution_context.py L153: False -> True                           suite=K own=K
+  base_execution_context.py L157: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L158: return X -> return None                 suite=K own=K
+  base_execution_context.py L154: negate if-condition                     suite=K own=K
+  base_execution_context.py L171: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L178: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L180: str 'sub_status' -> mutated             suite=SURVIVED own=SURVIVED
+  base_execution_context.py L180: str 'N/A' -> mutated                    suite=SURVIVED own=SURVIVED
+  base_execution_context.py L188: False -> True                           suite=SURVIVED own=SURVIVED
+  base_execution_context.py L196: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L199: return X -> return None                 suite=SURVIVED own=SURVIVED
+  base_execution_context.py L151: str '_internal_pk_range_f' -> mutated   suite=K own=K
+  base_execution_context.py L151: False -> True                           suite=K own=K
+  base_execution_context.py L155: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L156: return X -> return None                 suite=K own=K
+  base_execution_context.py L152: negate if-condition                     suite=K own=K
+  base_execution_context.py L169: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L176: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L178: str 'sub_status' -> mutated             suite=SURVIVED own=SURVIVED
+  base_execution_context.py L178: str 'N/A' -> mutated                    suite=SURVIVED own=SURVIVED
+  base_execution_context.py L186: False -> True                           suite=SURVIVED own=SURVIVED
+  base_execution_context.py L194: str 'Partition split retr' -> mutated   suite=SURVIVED own=SURVIVED
+  base_execution_context.py L197: return X -> return None                 suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L87: str 'PK range cache (asyn' -> mutated    suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L91: str '_internal_pk_range_f' -> mutated    suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L91: True -> False                            suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L105: str 'PK range cache (asyn' -> mutated   suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L73: str 'PK range cache: Init' -> mutated    suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L77: str '_internal_pk_range_f' -> mutated    suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L77: True -> False                            suite=SURVIVED own=SURVIVED
+  routing_map_provider.py L90: str 'PK range cache: Cach' -> mutated    suite=SURVIVED own=SURVIVED
+  _synchronized_request.py L90: str '_internal_pk_range_f' -> mutated    suite=SURVIVED own=SURVIVED
+  _asynchronous_request.py L60: str '_internal_pk_range_f' -> mutated    suite=SURVIVED own=SURVIVED
+{"mutants": 34, "mutation_score": 0.24, "own_rate": 0.24, "own_tests": ["test_routing_map_provider.py", "test_partition_split_retry_unit.py", "test_partition_split_retry_unit_async.py"]}

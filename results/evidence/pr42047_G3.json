@@ -1,0 +1,71 @@
+{
+  "gate_id": "G3",
+  "gate_type": "own_suite_sensitivity",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "42047",
+    "commit": "54d45994a",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_safety_evaluation/_safety_evaluation.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_adversarial_simulator.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py"
+    ]
+  },
+  "exercised": [
+    "5 mutants; PR-authored/modified tests only: ['test_safety_evaluation.py']"
+  ],
+  "assumptions": [
+    "baseline suite green at 54d45994a (tests/unittests/test_safety_evaluation.py tests/unittests/test_non_adv_simulator.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "mutant": "L200: IsNot -> Is"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "mutant": "L200: negate if-condition"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: IsNot -> Is"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: and<->or"
+    },
+    {
+      "kind": "undetected_by_pr_tests",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: negate if-condition"
+    }
+  ],
+  "not_evaluated": [
+    "whether PR tests were AI-generated alongside the code (assumed: same author)",
+    "equivalent mutants"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:21:02Z",
+  "own_suite_detection_rate": 0.0,
+  "machine_time_s": 35.2,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "The same randomization_seed always returns the same query sets",
+      "source": "rater"
+    }
+  }
+}

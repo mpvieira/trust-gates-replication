@@ -1,0 +1,10 @@
+  _cosmos_client_connection.py L1081: str 'max_concurrency' -> mutated       suite=SURVIVED own=n/a
+  _cosmos_client.py L397: str 'response_hook' -> mutated          suite=SURVIVED own=n/a
+  _cosmos_client.py L403: negate if-condition                     suite=SURVIVED own=n/a
+  _cosmos_client_connection_async.py L2287: str 'max_concurrency' -> mutated       suite=SURVIVED own=n/a
+  _read_items_helper_async.py L51: 5 -> 6                                   suite=SURVIVED own=n/a
+  _read_items_helper_async.py L60: 0 -> 1                                   suite=SURVIVED own=n/a
+  _read_items_helper_async.py L60: Gt -> GtE                                suite=SURVIVED own=n/a
+  _read_items_helper_async.py L60: and<->or                                 suite=SURVIVED own=n/a
+  _read_items_helper_async.py L60: 5 -> 6                                   suite=SURVIVED own=n/a
+{"mutants": 9, "mutation_score": 0.0, "own_rate": null, "own_tests": []}

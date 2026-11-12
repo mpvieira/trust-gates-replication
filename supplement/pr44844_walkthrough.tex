@@ -1,0 +1,280 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage[colorlinks,linkcolor=blue!60!black,urlcolor=blue!60!black,citecolor=blue!60!black]{hyperref}
+
+\lstset{basicstyle=\ttfamily\small,breaklines=true,columns=fullflexible,keepspaces=true,frame=single,
+  framerule=0.3pt,rulecolor=\color{black!40},xleftmargin=4pt,showstringspaces=false,
+  commentstyle=\color{black!55},language=Python,literate={`}{\textasciigrave}1}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\musthold}{\textsc{must-hold}}
+\newcommand{\mayfail}{\textsc{may-fail}}
+\newcommand{\cannot}{\textsc{cannot-guarantee}}
+\newcommand{\note}[1]{\begin{quote}\small\color{black!70}#1\end{quote}}
+
+\title{A Worked Case: Trust Gates on Pull Request \#44844\\
+\large \code{Azure/azure-sdk-for-python}, authored by the GitHub Copilot coding agent}
+\author{Supplement to \emph{Engineering Trust When AI Writes Your Software}}
+\date{Evidence gathered 2026-09-28/29; all commands reproducible with the replication package}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent This supplement walks through the second worked case of the case study. PR \#44844 fixed a real crash (a \code{RecursionError} when log-capturing contexts nest) and shipped with tests, a changelog entry, and a fluent description. It also changed which run a line of output is attributed to, for a usage pattern its author never considered and no requirement ever stated. The companion supplement on \#41852 shows a defect the project later found itself; this one shows a defect nobody has found yet, still present on \code{main}, and it makes two points the first case cannot: that the violated requirement had to be reconstructed from how the production caller uses the class, and that a claim check is only as good as the call sequence it mimics, since our first attempt at this check was wrong.
+\end{abstract}
+
+\section{The pull request as the reviewer saw it}
+
+\paragraph{The task.} During evaluation runs, \code{NodeLogManager} redirects \code{sys.stdout} and \code{sys.stderr} into per-run buffers so that each evaluated line's output can be stored with its run id. When evaluations nest (an evaluator that itself runs an evaluation), each nested manager wrapped the previous writer, and every \code{write} recursed through the whole chain. Deep enough nesting raised \code{RecursionError}. The GitHub Copilot coding agent was assigned the fix.
+
+\paragraph{The description.} The PR body: ``Nested NodeLogManager contexts could recursively forward stdout/stderr through stacked NodeLogWriter instances, leading to RecursionError during evaluation runs. This change ensures nested logging remains safe and deterministic under concurrent execution.'' Four bullets: \emph{logging guardrails} (``unwrap chained NodeLogWriter targets with cycle detection and safe fallback to real streams''); \emph{idempotent wrapping} (``reuse existing NodeLogWriter instances when streams are already wrapped''); tests; changelog. An example follows: two nested \code{with NodeLogManager():} blocks containing a \code{print}.
+
+\paragraph{The diff.} In \code{\_legacy/\_common/\_logging.py} (+29/$-$4), the manager's constructor reuses an existing writer instead of wrapping it:
+\begin{lstlisting}
+ def __init__(self, record_datetime: bool = True):
+-    self.stdout_logger = NodeLogWriter(sys.stdout, record_datetime)
+-    self.stderr_logger = NodeLogWriter(sys.stderr, record_datetime, is_stderr=True)
++    if isinstance(sys.stdout, NodeLogWriter):
++        self.stdout_logger = sys.stdout
++    else:
++        self.stdout_logger = NodeLogWriter(sys.stdout, record_datetime)
++    if isinstance(sys.stderr, NodeLogWriter):
++        self.stderr_logger = sys.stderr
++    else:
++        self.stderr_logger = NodeLogWriter(sys.stderr, record_datetime, is_stderr=True)
+\end{lstlisting}
+and the writer gains a fallback stream and a resolver that unwraps chains with cycle detection:
+\begin{lstlisting}
++    self._fallback_out = sys.__stderr__ if is_stderr else sys.__stdout__
+ ...
+-        return self._prev_out.write(s)
++        out = self._resolve_prev_out()
++        return out.write(s) if out is not None else 0
+ ...
++def _resolve_prev_out(self):
++    current = self._prev_out
++    visited = set()
++    while isinstance(current, NodeLogWriter):
++        if id(current) in visited:
++            return self._fallback_out
++        visited.add(id(current))
++        current = current._prev_out
++    return current if current is not None else self._fallback_out
+\end{lstlisting}
+A new \code{tests/unittests/test\_logging.py} (42 lines) holds two tests, and \code{CHANGELOG.md} gains ``Prevent recursive stdout/stderr forwarding when NodeLogManager is nested, avoiding RecursionError in concurrent evaluation runs.''
+
+\paragraph{The merge.} Squash commit \code{7d26b949}, merged 2026-02-03 into \code{main}. CI green; one human approval. The description's own example (two nested managers, no run contexts) is exactly what the tests exercise, and it works.
+
+\section{Requirements and trust hypotheses}
+\label{sec:hyp}
+
+\subsection{Extracting the requirements}
+The issue and description state one requirement. The second had to be reconstructed, and how that was done matters.
+
+\paragraph{R1 (stated).} Nested log-manager contexts do not recurse.
+
+\paragraph{R2 (unstated).} Output written inside a run is attributed to that run's log, including after a nested run has finished. Nothing in the issue, the description or the tests mentions attribution. It surfaces only by asking what the class is \emph{for}: its docstring says ``intercepts and saves logs to stdout/stderr when executing a node'', and its only production caller, \code{\_batch\_engine/\_engine.py}, does this for every evaluated line:
+\begin{lstlisting}
+@contextmanager
+def _exec_line_context(self, run_id, line_number):
+    log_manager = NodeLogManager()
+    log_manager.set_node_context(run_id, "Flex", line_number)
+    with log_manager, self._update_operation_context(run_id, line_number):
+        yield
+\end{lstlisting}
+Every line gets its own run id, and the per-run log is the product the manager exists to make. A requirement that nobody wrote down is still a requirement; the framework's instruction to extract requirements \emph{before} reading the change is what forces the question ``what must this fix not break?'' to be asked.
+
+\paragraph{R3 (stated, weakly).} When the real streams have been replaced, writes fall back somewhere safe.
+
+\subsection{The two-question procedure, applied}
+\emph{Q1:} would a violation be a security, safety, data-integrity or compliance failure, or make the artifact unfit for purpose? \emph{Q2:} does correct behaviour depend on resolving an ambiguity, on unobservable state, on open-ended completeness, or on behaviour with no reference implementation?
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{l l l l X}
+\toprule
+ & Q1 & Q2 & Level & Reasoning \\
+\midrule
+R1 & yes & no & \musthold\ (H1) & A crash during evaluation runs makes the SDK unfit; the behaviour is deterministic and directly testable. \\
+R2 & \textbf{yes} & \textbf{yes} & \musthold\ (H2) & Logs attributed to the wrong run are silently wrong data for the user (Q1). Whether attribution survives the fix depends on an unstated design question, ``should nested managers share state?'', which the change answers one way without saying so (Q2). \\
+R3 & no & yes & \cannot\ (H3) & What ``safe'' means when \code{sys.\_\_stdout\_\_} itself has been replaced (as the tests do) has no reference; the fix can only promise a best effort. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{Where the ambiguity is.} In \#41852 the ambiguity was about how users import the package. Here it is about ownership of state. A \code{NodeLogWriter} holds three things: the stream it forwards to, a \code{ContextVar} naming the current run, and a dictionary from run id to buffer. Before the PR, each manager owned its own writer and therefore its own context variable; after it, nested managers share one writer and one context variable. ``Idempotent wrapping'' sounds like a property of wrapping; it is in fact a decision that the inner run and the outer run share a single notion of ``current run''. Classifying R2 as must-hold \emph{and} ambiguity-dependent is what obliges the claim check to exercise the shared-state reading rather than the description's example.
+
+\subsection{Gate plan}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{X l X}
+\toprule
+Hypothesis & Level & Gates \\
+\midrule
+H1 no recursion & \musthold & G2/G3 (is the guard defended?), G4 (cycle check) \\
+H2 attribution preserved across nesting & \musthold & G4 (with the production caller's sequence); G2/G3 (are the reuse branches defended?) \\
+H3 fallback when real streams are replaced & \cannot & G2/G3 only; recorded as a limitation \\
+H0 referenced interfaces exist (standing, every PR) & \musthold & G1 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\note{Classification by a single analyst (the AI assistant) who had already seen the diff and the gate results, so it is not blind; the human rater's description-only classification supersedes it (that rater extracted R1 and R3, not R2). R2 is the contentious row: a rater who reads ``deterministic under concurrent execution'' as covering attribution might still assign must-hold, but would answer Q2 ``no'' and would then not be prompted to test the shared-state reading. That difference in Q2, not in the level, is what the procedure is designed to surface.}
+
+\section{Environment and baseline}
+\begin{lstlisting}[language=bash]
+git checkout 7d26b949
+export PYTHONPATH=$PWD/sdk/evaluation/azure-ai-evaluation
+export AZURE_TEST_RUN_LIVE=true AZURE_SKIP_LIVE_RECORDING=true
+python -m pytest -q tests/unittests/test_logging.py    # 2 passed
+grep -rl NodeLogManager tests/                          # only test_logging.py
+\end{lstlisting}
+The last line matters: the two tests the PR wrote are the only tests anywhere in the package that touch this module. The package suite and the PR's own suite are the same two tests, so G2 and G3 coincide by construction. Baseline green.
+
+\section{G1: interface resolution}
+25 changed lines; every import and every \code{module.attr} reference on them resolved; \code{pyflakes} reported no undefined names. Pass, no findings. As in the companion case, a pass rules out one failure mode and nothing more; \code{not\_evaluated} records that calls on objects of inferred type (\code{current.\_prev\_out}, \code{out.write}) are outside G1's reach.
+
+\section{G2 and G3: mutation on the changed lines}
+Thirteen single-point mutants on the changed lines; six killed, seven survived, identically for the package suite and the PR's tests.
+
+\begin{center}\small
+\begin{tabularx}{\textwidth}{l X X l}
+\toprule
+Line & Code & Mutation & Result \\
+\midrule
+174 & \code{if isinstance(sys.stdout, NodeLogWriter):} & negate condition & \textbf{survived} \\
+178 & \code{if isinstance(sys.stderr, NodeLogWriter):} & negate condition & \textbf{survived} \\
+181 & \code{is\_stderr=True} & \code{True}$\to$\code{False} & survived \\
+263 & \code{return out.write(s) if out is not None else 0} & \code{is not}$\to$\code{is} & killed \\
+263 & same & \code{0}$\to$\code{1} & survived \\
+263 & same & \code{return \ldots}$\to$\code{return None} & killed \\
+282 & \code{if out is not None: out.flush()} & \code{is not}$\to$\code{is} & survived \\
+282 & same & negate condition & survived \\
+294 & \code{if current\_id in visited:} & \code{in}$\to$\code{not in} & killed \\
+294 & same & negate condition & killed \\
+295 & \code{return self.\_fallback\_out} (cycle) & \code{return None} & survived \\
+298 & \code{return current if current is not None else \ldots} & \code{is not}$\to$\code{is} & killed \\
+298 & same & \code{return None} & killed \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{Reading the survivors.} The resolver's loop (lines 294, 298) is defended: the 500-deep test kills anything that breaks unwrapping. The two constructor branches (174, 178), the ones that implement ``idempotent wrapping'', are not: negate either and both tests still pass, because with the resolver in place a chain of wrappers unwinds correctly whether or not writers are reused. So the tests establish H1 and say nothing about the reuse decision at all. Lines 181, 263, 282 and 295 are the fallback and flush paths, never reached by any test; that is H3's evidence gap.
+
+\paragraph{What G2/G3 contributed.} Not a defect but a direction. The PR's second headline feature has no test that would notice its absence, and it is the feature that changes state ownership. That is where G4 has to look.
+
+\section{G4: claim checks}
+\label{sec:g4}
+
+\subsection{The claims}
+\begin{enumerate}[nosep,label=(\alph*)]
+  \item Chained writers are unwrapped with cycle detection and safe fallback to real streams.
+  \item Existing writers are reused rather than re-wrapped.
+  \item Nested logging remains safe and deterministic under concurrent execution.
+  \item The tests cover nested writers and nested manager usage.
+\end{enumerate}
+(a) and (b) are directly checkable. (c) is the claim that carries H2; ``deterministic'' is a property of what gets logged where, and the description's example, two managers with no run contexts, cannot show it because without contexts nothing is attributed to anything. The check for (c) therefore has to set run contexts the way the production caller does. (d) is settled by Section~5.
+
+\subsection{Checks C1 and C2}
+\begin{lstlisting}
+a = NodeLogWriter(io.StringIO()); b = NodeLogWriter(a); a._prev_out = b     # C1: a two-writer cycle
+b.write("cycle")               # parent: RecursionError;  PR: returns, text reaches sys.__stdout__
+with NodeLogManager() as outer:
+    with NodeLogManager() as inner:
+        inner.stdout_logger is outer.stdout_logger      # C2: parent False;  PR True
+\end{lstlisting}
+Both claims supported.
+
+\subsection{Check S, first attempt (discarded)}
+The first version of the attribution check was written from a plausible-looking scenario: an outer manager sets context \code{r1}, an inner manager sets \code{r2} and then explicitly \emph{clears} it before exiting. At the merge commit, outer output written after the inner block leaked to the real \code{stdout} instead of \code{r1}. That looked like a defect, but the scenario was invented: nothing in the code base calls \code{clear\_node\_context}. A check that mimics a call sequence the software never performs proves nothing about the software. The check was rewritten from the production caller.
+
+\subsection{Check S, from the production caller}
+\code{\_exec\_line\_context} constructs the manager, sets the run context, then enters; it never clears. Nesting it once:
+\begin{lstlisting}
+outer = NodeLogManager(); outer.set_node_context("r1", "Flex", 1)
+with outer:
+    print("outer-before")
+    inner = NodeLogManager(); inner.set_node_context("r2", "Flex", 1)
+    with inner:
+        print("inner-line")
+    print("outer-after")
+o, i = outer.get_logs("r1")["stdout"], outer.get_logs("r2")["stdout"]
+\end{lstlisting}
+
+\begin{center}\small
+\begin{tabular}{l c c c}
+\toprule
+ & \code{outer-after} in r1 & \code{outer-after} in r2 & \code{outer-after} on real stdout \\
+\midrule
+Before the PR (parent) & yes & no & no \\
+After the PR (merge commit) & \textbf{no} & \textbf{yes} & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+(\code{inner-line} shows as absent from \code{r2} at the parent only because the query goes through the outer manager's writer; at the parent the inner writer was a separate object with its own buffers. This is a property of the check's bookkeeping, not a finding.)
+
+\subsection{Why}
+Before the PR: the inner manager wraps the outer writer in a new writer with its own \code{ContextVar}; \code{set\_node\_context("r2")} sets that inner variable; on \code{\_\_exit\_\_}, \code{sys.stdout} is restored to the outer writer, whose own variable still says \code{r1}; \code{outer-after} lands in \code{r1}. After the PR: the inner manager \emph{is} the outer writer; \code{set\_node\_context("r2")} overwrites the one shared variable; \code{\_\_exit\_\_} restores \code{sys.stdout} to the same object, and nothing restores the variable, because before the PR nothing needed to; \code{outer-after} lands in \code{r2}, whose buffer exists in the shared dictionary, so the line is not lost but misfiled. The fix for the recursion is exactly the cause of the misattribution: two properties of ``one writer per manager'' were doing work, and the PR kept one.
+
+\section{Triage}
+\begin{description}[nosep]
+  \item[Confirmed defect?] Yes: H2 violated with the production caller's exact sequence, reproduced by script, before/after.
+  \item[Escaped?] Yes: CI green; no review comment mentions attribution, contexts or shared state; present in merged code; still present on \code{main} on 2026-09-28.
+  \item[Failure mode.] Assumption injection: ``should nested managers share state?'' was answered ``yes'' implicitly, and the consequence for the run context was not considered.
+  \item[Severity.] Major: silently wrong per-run logs whenever evaluations nest, which is the situation the PR exists to handle.
+  \item[Second finding.] Evidence gap: 7/13 mutants survive, including both reuse branches; H3's paths untested.
+  \item[Not evaluated.] Concurrent execution (claim (c)): \code{ContextVar} values are per task, so sharing a writer across concurrent tasks may well be safe, but this was not exercised. The \code{stderr} writer, symmetric code, not separately exercised.
+\end{description}
+\note{Single-analyst triage, recorded in \code{results/evidence/pr44844\_G4.json}; independent human re-run and re-judgement required before citation.}
+
+\section{Downstream status}
+No downstream confirmation exists. \code{git show main:\ldots/\_logging.py} on 2026-09-28 still contains the reuse branches, and no later PR touches attribution. That is itself a data point: the misattribution produces no exception, no failed test and no visible error, only logs filed under the wrong run, which is the kind of defect the paper's introduction describes as surfacing ``only when the system reaches conditions neither the model nor the team explicitly considered''. It was reported to the project as issue \#49274 on 2026-09-30; a maintainer confirmation would give this case the external anchor that \#42313 gives the companion case.
+
+\section{The claim--evidence--limitation statement}
+This is the statement shown as Figure~2 in the article.
+\begin{center}\small
+\begin{tabularx}{\textwidth}{X X X}
+\toprule
+\textbf{Claim} & \textbf{Evidence} & \textbf{Limitations} \\
+\midrule
+Nested \code{NodeLogManager} contexts no longer recurse, and output written inside them reaches the underlying stream.\newline\emph{Scope:} nesting \emph{without} per-run context switches.\newline\emph{Serves:} H1 must-hold, H3 cannot-guarantee. &
+PR test: 500-deep nesting, no \code{RecursionError}, text reaches base streams.\newline G4 C1: two-writer cycle resolves to \code{sys.\_\_stdout\_\_}.\newline G4 C2: inner manager reuses the outer writer.\newline G1: 25 lines, all references resolve.\newline G2/G3: 6 of 13 mutants killed. &
+Per-run attribution across a nesting boundary is \textbf{incorrect} (H2 must-hold, violated): with the batch engine's call sequence, outer-run output after a nested run is logged under the inner run id. Confirmed; on \code{main}.\newline 7/13 mutants survive, including both reuse branches.\newline Concurrent execution, also claimed, not evaluated.\newline \code{stderr} path not separately exercised. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+The scope says ``without per-run context switches''; the first limitation says what happens with them. A reviewer holding this statement next to a diff that adds \code{isinstance(sys.stdout, NodeLogWriter)} to a constructor would have had the question in front of them.
+
+\section{What each gate contributed, and what it cost}
+\begin{center}\small
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+Gate & Contribution & Cost \\
+\midrule
+G1 & Ruled out hallucinated interfaces & seconds \\
+G2/G3 & Showed the reuse branches (the state-ownership decision) are undefended by any test & $<$1 min machine \\
+G4 & Found the defect, after one discarded check; identified the mechanism & $\approx$35 min analyst, including reading the caller \\
+Downstream search & Established that the defect is unfound and still present & $\approx$5 min \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{The counterfactual.} The pipeline reported that the agent's two tests pass, and they test the property the agent was asked to deliver. Static analysis has nothing to say about which object owns a \code{ContextVar}. The reviewer saw a crash fixed, tests added, a changelog entry, and an example that runs. What found the defect was writing down a requirement the PR never mentioned, classifying it as must-hold and ambiguity-dependent, and then refusing to accept a check that did not mimic the production caller. The first discarded check is part of the method, not an embarrassment to hide: the gate's value depends entirely on the fidelity of what it exercises.
+
+\section{Reproduction}
+\begin{lstlisting}[language=bash]
+python run_experiments.py run --prs 44844            # G1, G2/G3, G4
+cat evidence/pr44844_G4_output.txt                     # the before/after table of Section 6
+python run_experiments.py compare --prs 44844
+sed -n 443,448p azsdk/sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_legacy/_batch_engine/_engine.py   # the caller
+\end{lstlisting}
+
+\section*{Notes on method}
+The discarded first check is the methodological lesson of this case: a claim check must be derived from the description and from the software's real call sequences, never from a scenario that merely seems plausible. Every judgment in Sections~\ref{sec:hyp} and~7 is currently single-analyst; the human classification sheet and an independent re-run of Section~\ref{sec:g4} are prerequisites for citing this case.
+
+\end{document}

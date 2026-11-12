@@ -1,0 +1,341 @@
+{
+  "gate_id": "G2",
+  "gate_type": "test_independence_mutation",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "46707",
+    "commit": "53dcd7783357a76ba374dec23c46ef772865231c",
+    "files": [
+      "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py"
+    ]
+  },
+  "exercised": [
+    "46 mutants on 32 changed lines across 1 files; full package suite (tests/receipt)"
+  ],
+  "assumptions": [
+    "baseline suite green at 53dcd7783357a76ba374dec23c46ef772865231c (tests/receipt)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L143: str 'right' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L143: In -> NotIn"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L147: str 'right' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L381: remove raise"
+    }
+  ],
+  "not_evaluated": [
+    "equivalent-mutant analysis (surviving mutants need manual review)",
+    "lines outside the PR diff",
+    "mutation operators beyond the 9 implemented (no statement deletion, no call-argument mutation)"
+  ],
+  "tool_versions": {
+    "python": "3.12.4"
+  },
+  "timestamp": "2026-09-29T23:56:44Z",
+  "mutation_score": 0.91,
+  "mutants": [
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L119: remove not",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L120: remove raise",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L119: negate if-condition",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L123: str 'cert' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L123: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L124: str 'cert' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L126: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L126: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L127: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L129: str 'claimsDigest' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L129: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L129: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L130: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L130: str 'claimsDigest' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L132: str 'commitEvidence' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L132: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L132: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L133: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L133: str 'commitEvidence' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L135: str 'writeSetDigest' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L135: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L135: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L136: str 'leafComponents' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L136: str 'writeSetDigest' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L138: str 'proof' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L138: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L139: str 'proof' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L143: str 'left' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L143: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L143: str 'right' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L143: In -> NotIn",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L143: and<->or",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L145: str 'left' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L147: str 'right' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L149: str 'signature' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L149: In -> NotIn",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L150: str 'signature' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L154: str 'nodeId' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L158: str 'serviceEndorsements' -> mutated",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L165: remove raise",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L187: NotEq -> Eq",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L188: remove raise",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L187: negate if-condition",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L380: remove not",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L381: remove raise",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/confidentialledger/azure-confidentialledger/azure/confidentialledger/receipt/_receipt_verification.py",
+      "mutant": "L380: negate if-condition",
+      "killed_by_suite": true,
+      "killed_by_pr_tests": null
+    }
+  ],
+  "machine_time_s": 28.2,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "Malformed receipts are rejected"
+    }
+  }
+}

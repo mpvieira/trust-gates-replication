@@ -1,0 +1,82 @@
+{
+  "gate_id": "G4",
+  "gate_type": "claim_implementation_correspondence",
+  "linked_hypothesis_ids": [
+    "H1",
+    "H2",
+    "H4",
+    "A1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "44844",
+    "commit": "7d26b949",
+    "files": [
+      "azure/ai/evaluation/_legacy/_common/_logging.py"
+    ]
+  },
+  "exercised": [
+    "C1 cycle detection + fallback: constructed a 2-writer cycle, write() reached sys.__stdout__ (supported; RecursionError at parent)",
+    "C2 idempotent wrapping: inner.stdout_logger is outer.stdout_logger (supported)",
+    "S engine sequence (construct, set_node_context, enter; nested): after inner exits, outer output attributed to inner run id r2 at PR commit; attributed to r1 at parent"
+  ],
+  "assumptions": [
+    "_batch_engine._exec_line_context is the production caller (it is the only one)",
+    "nested line execution occurs in practice (it is the trigger of the original RecursionError issue)"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "confirmed_defect",
+      "failure_mode": "assumption_injection",
+      "severity": "major",
+      "detail": "Sharing one NodeLogWriter (and its ContextVar and run_id map) across nested NodeLogManagers means the inner set_node_context overwrites the outer context and nothing restores it on inner exit; outer-line output after a nested evaluation is logged under the inner run id. Present on main at 2026-09-28. Escaped: CI green, no review comment, PR tests check only that text reaches the base stream"
+    },
+    {
+      "kind": "evidence_gap",
+      "detail": "7 of 13 mutants survive the PR's own tests, including negation of both reuse branches (L174/L178): the idempotent-wrapping claim is not protected by the tests written for it"
+    }
+  ],
+  "not_evaluated": [
+    "concurrent (multi-thread) execution, which the PR description also claims",
+    "stderr path (symmetric code, not separately exercised)"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T20:49:43Z",
+  "claims": [
+    {
+      "claim": "nested logging remains safe and deterministic under concurrent execution",
+      "status": "partially supported: no recursion; attribution not deterministic across nesting boundary"
+    },
+    {
+      "claim": "reuse existing NodeLogWriter instances when streams are already wrapped",
+      "status": "supported, and the cause of the defect below"
+    }
+  ],
+  "machine_time_s": 0.0,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "Nested NodeLogManager contexts do not lead to RecursionError during evaluation runs",
+      "source": "rater"
+    },
+    "H2": {
+      "category": "may-fail",
+      "statement": "Chained NodeLogWriter targets are unwrapped with cycle detection",
+      "source": "rater"
+    },
+    "H4": {
+      "category": "may-fail",
+      "statement": "Existing NodeLogWriter instances are reused when streams are already wrapped",
+      "source": "rater"
+    },
+    "A1": {
+      "category": "must-hold",
+      "statement": "Per-run log attribution is preserved across a nesting boundary (reconstructed from the production caller)",
+      "source": "analyst"
+    }
+  },
+  "hypothesis_note": "Re-linked 2026-10-02 to the independent rater's classification (H1..Hn) and the analyst's non-blind extra requirements (A1..). Free-text fields below (exercised, claims, findings) were written during triage on 2026-09-28/29 and may refer to the analyst's earlier H-numbering."
+}

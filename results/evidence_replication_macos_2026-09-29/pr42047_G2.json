@@ -1,0 +1,103 @@
+{
+  "gate_id": "G2",
+  "gate_type": "test_independence_mutation",
+  "linked_hypothesis_ids": [
+    "H1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "42047",
+    "commit": "54d45994a",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_safety_evaluation/_safety_evaluation.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_adversarial_simulator.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py"
+    ]
+  },
+  "exercised": [
+    "5 mutants on 31 changed lines across 4 files; full package suite (tests/unittests/test_safety_evaluation.py tests/unittests/test_non_adv_simulator.py)"
+  ],
+  "assumptions": [
+    "baseline suite green at 54d45994a (tests/unittests/test_safety_evaluation.py tests/unittests/test_non_adv_simulator.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "mutant": "L200: IsNot -> Is"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "mutant": "L200: negate if-condition"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: IsNot -> Is"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: and<->or"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: negate if-condition"
+    }
+  ],
+  "not_evaluated": [
+    "equivalent-mutant analysis (surviving mutants need manual review)",
+    "lines outside the PR diff",
+    "mutation operators beyond the 9 implemented (no statement deletion, no call-argument mutation)"
+  ],
+  "tool_versions": {
+    "python": "3.12.4"
+  },
+  "timestamp": "2026-09-29T23:58:52Z",
+  "mutation_score": 0.0,
+  "mutants": [
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "mutant": "L200: IsNot -> Is",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "mutant": "L200: negate if-condition",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: IsNot -> Is",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: and<->or",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    },
+    {
+      "file": "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py",
+      "mutant": "L168: negate if-condition",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": false
+    }
+  ],
+  "machine_time_s": 22.0,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "The same randomization seed yields the same query set"
+    }
+  }
+}

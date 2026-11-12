@@ -1,0 +1,26 @@
+# G4 for PR #44770 at 9a8a19a39 — 2026-09-29 23:58 UTC
+# expected: execution contexts differ by one added warning log; routing providers identical; flag pop in both
+# hypothesis H1 (must-hold): The port matches the human hotfix PR #44649
+
+$ git rev-parse -q --verify pr44649 >/dev/null || git fetch -q --depth=1 origin pull/44649/head:pr44649
+
+
+$ for f in azure/cosmos/_execution_context/base_execution_context.py azure/cosmos/_execution_context/aio/base_execution_context.py azure/cosmos/_routing/routing_map_provider.py azure/cosmos/_routing/aio/routing_map_provider.py azure/cosmos/_synchronized_request.py azure/cosmos/aio/_asynchronous_request.py; do echo "$f -> $(git diff --stat pr44649 9a8a19a39 -- sdk/cosmos/azure-cosmos/$f | tail -1)"; done
+azure/cosmos/_execution_context/base_execution_context.py ->  1 file changed, 4 insertions(+)
+azure/cosmos/_execution_context/aio/base_execution_context.py ->  1 file changed, 4 insertions(+)
+azure/cosmos/_routing/routing_map_provider.py -> 
+azure/cosmos/_routing/aio/routing_map_provider.py -> 
+azure/cosmos/_synchronized_request.py ->  1 file changed, 58 insertions(+), 6 deletions(-)
+azure/cosmos/aio/_asynchronous_request.py ->  1 file changed, 49 insertions(+), 5 deletions(-)
+
+$ git diff pr44649 9a8a19a39 -- sdk/cosmos/azure-cosmos/azure/cosmos/_execution_context/base_execution_context.py | grep '^[+-]' | grep -v '^+++\|^---'
++        _LOGGER.warning(
++            "Partition split retry: Unexpectedly exited retry loop without returning results. "
++            "This indicates a potential logic error."
++        )
+
+$ for r in pr44649 9a8a19a39; do echo "$r flag-pop lines:"; git show $r:sdk/cosmos/azure-cosmos/azure/cosmos/_synchronized_request.py | grep -n _internal_pk_range_fetch; done
+pr44649 flag-pop lines:
+84:    kwargs.pop("_internal_pk_range_fetch", None)
+9a8a19a39 flag-pop lines:
+90:    kwargs.pop("_internal_pk_range_fetch", None)

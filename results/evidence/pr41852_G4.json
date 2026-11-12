@@ -1,0 +1,66 @@
+{
+  "gate_id": "G4",
+  "gate_type": "claim_implementation_correspondence",
+  "linked_hypothesis_ids": [
+    "H1",
+    "A1"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "41852",
+    "commit": "d76b8ba34",
+    "files": [
+      "azure/ai/evaluation/__init__.py",
+      "azure/ai/evaluation/red_team/__init__.py"
+    ]
+  },
+  "exercised": [
+    "C1 import azure.ai.evaluation with azure-ai-projects absent: parent prints [INFO] line; PR prints nothing (supported)",
+    "C2 attribute access: parent AttributeError; PR ImportError with install hint (supported)",
+    "S1 hasattr(module,'AIAgentConverter'): parent False; PR raises ImportError",
+    "S2 from azure.ai.evaluation import *: parent succeeds; PR raises ImportError",
+    "S3 'AIAgentConverter' in __all__: parent False; PR True"
+  ],
+  "assumptions": [],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "confirmed_defect",
+      "failure_mode": "assumption_injection",
+      "severity": "major",
+      "detail": "Adding lazy names to __all__ makes `from azure.ai.evaluation import *` raise ImportError whenever the optional dependency is absent, and makes hasattr() raise. Escaped: CI green, no review comment. Downstream-confirmed: human PR #42313 (2025-07-31, 17 days later) 'Remove lazy imports from __all__' after a release gate that imports everything in __all__ failed"
+    },
+    {
+      "kind": "evidence_gap",
+      "detail": "0/20 mutants killed; the PR's tests re-implement the lazy-import mechanism inside the test file and test the copy"
+    }
+  ],
+  "not_evaluated": [
+    "behaviour with the optional dependency installed",
+    "red_team/__init__.py changes"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:35:05Z",
+  "claims": [
+    {
+      "claim": "messages only shown when someone actually tries to use the converter classes",
+      "status": "not supported: star-import and hasattr trigger it"
+    }
+  ],
+  "machine_time_s": 0.0,
+  "hypotheses": {
+    "H1": {
+      "category": "may-fail",
+      "statement": "Importing azure.ai.evaluation without using the converters produces no informational message",
+      "source": "rater"
+    },
+    "A1": {
+      "category": "must-hold",
+      "statement": "The public import surface (import *, hasattr) remains usable without the optional dependency",
+      "source": "analyst"
+    }
+  },
+  "hypothesis_note": "Re-linked 2026-10-02 to the independent rater's classification (H1..Hn) and the analyst's non-blind extra requirements (A1..). Free-text fields below (exercised, claims, findings) were written during triage on 2026-09-28/29 and may refer to the analyst's earlier H-numbering."
+}

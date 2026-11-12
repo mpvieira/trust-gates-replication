@@ -1,0 +1,73 @@
+{
+  "gate_id": "G4",
+  "gate_type": "claim_implementation_correspondence",
+  "linked_hypothesis_ids": [
+    "H1",
+    "H2"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "42047",
+    "commit": "54d45994a",
+    "files": [
+      "azure/ai/evaluation/simulator/_adversarial_simulator.py",
+      "_indirect_attack_simulator.py",
+      "_simulator.py",
+      "_safety_evaluation/_safety_evaluation.py"
+    ]
+  },
+  "exercised": [
+    "static: _safety_evaluation now forwards randomization_seed to Simulator (supported)",
+    "static: result collection uses asyncio.as_completed (order is completion order regardless of seed)",
+    "static: nothing in the diff touches row-count logic (min(total_tasks, max_simulation_results))",
+    "PR tests inspected: both new tests exercise random.Random directly, not the simulators"
+  ],
+  "assumptions": [],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "possible_claim_divergence",
+      "detail": "PR root-cause narrative (seeding) does not explain the reported symptom (different row counts); requires a live run to confirm or refute"
+    },
+    {
+      "kind": "evidence_gap",
+      "detail": "0/5 mutants killed; the PR's tests test the standard library, not the changed code"
+    }
+  ],
+  "not_evaluated": [
+    "live simulation against the RAI service",
+    "determinism of returned order under concurrency"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:35:05Z",
+  "claims": [
+    {
+      "claim": "IndirectAttackSimulator now honours randomization_seed",
+      "status": "supported statically; not executable offline"
+    },
+    {
+      "claim": "local Random avoids polluting global state",
+      "status": "supported statically"
+    },
+    {
+      "claim": "same seed produces identical query sets (fixes differing counts)",
+      "status": "not checkable offline; the reported symptom (counts) is not addressed by seeding"
+    }
+  ],
+  "machine_time_s": 0.0,
+  "hypotheses": {
+    "H1": {
+      "category": "must-hold",
+      "statement": "The same randomization_seed always returns the same query sets",
+      "source": "rater"
+    },
+    "H2": {
+      "category": "must-hold",
+      "statement": "SafetyEvaluation with a randomization_seed does not modify the global random state",
+      "source": "rater"
+    }
+  },
+  "hypothesis_note": "Re-linked 2026-10-02 to the independent rater's classification (H1..Hn) and the analyst's non-blind extra requirements (A1..). Free-text fields below (exercised, claims, findings) were written during triage on 2026-09-28/29 and may refer to the analyst's earlier H-numbering."
+}

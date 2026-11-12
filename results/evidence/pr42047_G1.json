@@ -1,0 +1,51 @@
+{
+  "gate_id": "G1",
+  "gate_type": "interface_reality",
+  "linked_hypothesis_ids": [
+    "H0"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "42047",
+    "commit": "54d45994a",
+    "files": [
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_safety_evaluation/_safety_evaluation.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_adversarial_simulator.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py",
+      "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py"
+    ]
+  },
+  "exercised": [
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_safety_evaluation/_safety_evaluation.py: pyflakes undefined-name scan, restricted to 1 changed lines",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/_safety_evaluation/_safety_evaluation.py: 0 module-attribute references on changed lines resolved against installed modules",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_adversarial_simulator.py: pyflakes undefined-name scan, restricted to 5 changed lines",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_adversarial_simulator.py: 2 module-attribute references on changed lines resolved against installed modules",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py: pyflakes undefined-name scan, restricted to 13 changed lines",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_indirect_attack_simulator.py: 1 module-attribute references on changed lines resolved against installed modules",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py: pyflakes undefined-name scan, restricted to 12 changed lines",
+    "sdk/evaluation/azure-ai-evaluation/azure/ai/evaluation/simulator/_simulator.py: 1 module-attribute references on changed lines resolved against installed modules"
+  ],
+  "assumptions": [
+    "package installed in the analysis environment at the PR's own dependency pins",
+    "attribute existence checked against the installed module, not the version pinned in CI"
+  ],
+  "result": "pass",
+  "findings": [],
+  "not_evaluated": [
+    "method calls on objects of inferred type (no type inference performed)",
+    "HTTP endpoints, service API versions, and config keys referenced as strings",
+    "packages added to manifests (checked by pip install, not by this gate)"
+  ],
+  "tool_versions": {
+    "python": "3.12.3"
+  },
+  "timestamp": "2026-09-28T22:20:42Z",
+  "machine_time_s": 0.4,
+  "hypotheses": {
+    "H0": {
+      "category": "must-hold",
+      "statement": "The change references only modules, symbols and attributes that exist (no hallucinated interfaces)",
+      "source": "standing"
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "gate_id": "G2",
+  "gate_type": "test_independence_mutation",
+  "linked_hypothesis_ids": [
+    "H1",
+    "H2",
+    "H3"
+  ],
+  "artifact_ref": {
+    "repo": "Azure/azure-sdk-for-python",
+    "pr": "43269",
+    "commit": "7e59645b2",
+    "files": [
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_cosmos_client_connection.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/_read_items_helper.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_container.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client_connection_async.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/container.py",
+      "sdk/cosmos/azure-cosmos/azure/cosmos/cosmos_client.py"
+    ]
+  },
+  "exercised": [
+    "9 mutants on 73 changed lines across 8 files; full package suite (tests/test_base_unit.py tests/test_session_token_unit.py tests/routing/test_routing_map_provider.py)"
+  ],
+  "assumptions": [
+    "baseline suite green at 7e59645b2 (tests/test_base_unit.py tests/test_session_token_unit.py tests/routing/test_routing_map_provider.py)",
+    "mutants confined to lines added/modified by the PR; formatting/comments lost via ast.unparse",
+    "test order-dependence and flakiness not controlled"
+  ],
+  "result": "findings",
+  "findings": [
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_cosmos_client_connection.py",
+      "mutant": "L1081: str 'max_concurrency' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py",
+      "mutant": "L397: str 'response_hook' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py",
+      "mutant": "L403: negate if-condition"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client_connection_async.py",
+      "mutant": "L2287: str 'max_concurrency' -> mutated"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L51: 5 -> 6"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: 0 -> 1"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: Gt -> GtE"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: and<->or"
+    },
+    {
+      "kind": "surviving_mutant",
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: 5 -> 6"
+    }
+  ],
+  "not_evaluated": [
+    "equivalent-mutant analysis (surviving mutants need manual review)",
+    "lines outside the PR diff",
+    "mutation operators beyond the 9 implemented (no statement deletion, no call-argument mutation)"
+  ],
+  "tool_versions": {
+    "python": "3.12.4"
+  },
+  "timestamp": "2026-09-29T23:56:30Z",
+  "mutation_score": 0.0,
+  "mutants": [
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/_cosmos_client_connection.py",
+      "mutant": "L1081: str 'max_concurrency' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py",
+      "mutant": "L397: str 'response_hook' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client.py",
+      "mutant": "L403: negate if-condition",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_cosmos_client_connection_async.py",
+      "mutant": "L2287: str 'max_concurrency' -> mutated",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L51: 5 -> 6",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: 0 -> 1",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: Gt -> GtE",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: and<->or",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    },
+    {
+      "file": "sdk/cosmos/azure-cosmos/azure/cosmos/aio/_read_items_helper_async.py",
+      "mutant": "L60: 5 -> 6",
+      "killed_by_suite": false,
+      "killed_by_pr_tests": null
+    }
+  ],
+  "machine_time_s": 5.7,
+  "hypotheses": {
+    "H1": {
+      "category": "may-fail",
+      "statement": "Sync read_items default concurrency follows ThreadPoolExecutor"
+    },
+    "H2": {
+      "category": "must-hold",
+      "statement": "Async behaviour unchanged, as the PR description states"
+    },
+    "H3": {
+      "category": "may-fail",
+      "statement": "response_hook is invoked on create_database"
+    }
+  }
+}

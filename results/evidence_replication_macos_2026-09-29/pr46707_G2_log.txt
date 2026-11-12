@@ -1,0 +1,47 @@
+  _receipt_verification.py L119: remove not                              suite=K own=n/a
+  _receipt_verification.py L120: remove raise                            suite=K own=n/a
+  _receipt_verification.py L119: negate if-condition                     suite=K own=n/a
+  _receipt_verification.py L123: str 'cert' -> mutated                   suite=K own=n/a
+  _receipt_verification.py L123: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L124: str 'cert' -> mutated                   suite=K own=n/a
+  _receipt_verification.py L126: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L126: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L127: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L129: str 'claimsDigest' -> mutated           suite=K own=n/a
+  _receipt_verification.py L129: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L129: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L130: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L130: str 'claimsDigest' -> mutated           suite=K own=n/a
+  _receipt_verification.py L132: str 'commitEvidence' -> mutated         suite=K own=n/a
+  _receipt_verification.py L132: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L132: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L133: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L133: str 'commitEvidence' -> mutated         suite=K own=n/a
+  _receipt_verification.py L135: str 'writeSetDigest' -> mutated         suite=K own=n/a
+  _receipt_verification.py L135: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L135: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L136: str 'leafComponents' -> mutated         suite=K own=n/a
+  _receipt_verification.py L136: str 'writeSetDigest' -> mutated         suite=K own=n/a
+  _receipt_verification.py L138: str 'proof' -> mutated                  suite=K own=n/a
+  _receipt_verification.py L138: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L139: str 'proof' -> mutated                  suite=K own=n/a
+  _receipt_verification.py L143: str 'left' -> mutated                   suite=K own=n/a
+  _receipt_verification.py L143: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L143: str 'right' -> mutated                  suite=SURVIVED own=n/a
+  _receipt_verification.py L143: In -> NotIn                             suite=SURVIVED own=n/a
+  _receipt_verification.py L143: and<->or                                suite=K own=n/a
+  _receipt_verification.py L145: str 'left' -> mutated                   suite=K own=n/a
+  _receipt_verification.py L147: str 'right' -> mutated                  suite=SURVIVED own=n/a
+  _receipt_verification.py L149: str 'signature' -> mutated              suite=K own=n/a
+  _receipt_verification.py L149: In -> NotIn                             suite=K own=n/a
+  _receipt_verification.py L150: str 'signature' -> mutated              suite=K own=n/a
+  _receipt_verification.py L154: str 'nodeId' -> mutated                 suite=K own=n/a
+  _receipt_verification.py L158: str 'serviceEndorsements' -> mutated    suite=K own=n/a
+  _receipt_verification.py L165: remove raise                            suite=K own=n/a
+  _receipt_verification.py L187: NotEq -> Eq                             suite=K own=n/a
+  _receipt_verification.py L188: remove raise                            suite=K own=n/a
+  _receipt_verification.py L187: negate if-condition                     suite=K own=n/a
+  _receipt_verification.py L380: remove not                              suite=K own=n/a
+  _receipt_verification.py L381: remove raise                            suite=SURVIVED own=n/a
+  _receipt_verification.py L380: negate if-condition                     suite=K own=n/a
+{"mutants": 46, "mutation_score": 0.91, "own_rate": null, "own_tests": []}

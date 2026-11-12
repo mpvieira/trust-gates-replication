@@ -1,0 +1,32 @@
+# G4 for PR #46707 at 53dcd7783357a76ba374dec23c46ef772865231c — 2026-09-29 23:57 UTC
+# expected: after: all malformed inputs rejected in both modes; before under -O: all accepted
+# hypothesis H1 (must-hold): Malformed receipts are rejected
+# hypothesis H2 (must-hold): Rejection holds under python -O (assert stripping)
+
+## AFTER the PR (merge commit)
+missing signature                -> ValueError 
+  proof elem without left/right    -> ValueError 
+  right not a str                  -> ValueError 
+  right-only elem, valid           -> accepted 
+  RSA cert                         -> ValueError: PEM certificate -----BEGIN CERTIFICATE----- MIICkTCCAXmgAwIB
+
+## AFTER the PR (merge commit) (python -O)
+missing signature                -> ValueError (python -O)
+  proof elem without left/right    -> ValueError (python -O)
+  right not a str                  -> ValueError (python -O)
+  right-only elem, valid           -> accepted (python -O)
+  RSA cert                         -> ValueError: PEM certificate -----BEGIN CERTIFICATE----- MIICkTCCAXmgAwIB
+
+## BEFORE the PR (changed files from parent)
+missing signature                -> ValueError 
+  proof elem without left/right    -> ValueError 
+  right not a str                  -> ValueError 
+  right-only elem, valid           -> accepted 
+  RSA cert                         -> ValueError: PEM certificate -----BEGIN CERTIFICATE----- MIICkTCCAXmgAwIB
+
+## BEFORE the PR (changed files from parent) (python -O)
+missing signature                -> accepted (python -O)
+  proof elem without left/right    -> accepted (python -O)
+  right not a str                  -> accepted (python -O)
+  right-only elem, valid           -> accepted (python -O)
+  RSA cert                         -> accepted

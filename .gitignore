@@ -1,0 +1,12 @@
+# work-directory contents created by run_experiments.py (keep the repo to code, config and shipped results)
+replication/azsdk/
+replication/evidence/
+replication/venv/
+**/__pycache__/
+*.pyc
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.synctex.gz
+.DS_Store

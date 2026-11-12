@@ -1,0 +1,18 @@
+# G4 for PR #41852 at d76b8ba34 — 2026-09-29 01:54 UTC
+# expected: after: hasattr and import * raise ImportError; before: hasattr False, import * ok
+# hypothesis H1 (may-fail): No output is printed at import time when an optional dependency is absent
+# hypothesis H2 (must-hold): The public import surface (import *, hasattr) remains usable without the optional dependency
+
+## AFTER the PR (merge commit)
+C1 import-time output: ''
+C2 attribute access -> ImportError: Could not import AIAgentConverter. Please install the depend
+S1 hasattr -> raises ImportError
+S2 'from azure.ai.evaluation import *' -> raises ImportError Could not import AIAgentConverter. Please install 
+S3 'AIAgentConverter' in __all__: True
+
+## BEFORE the PR (changed files from parent)
+C1 import-time output: '[INFO] Could not import AIAgentConverter. Please install the dependency with `pi'
+C2 attribute access -> AttributeError
+S1 hasattr(module,'AIAgentConverter') -> False
+S2 'from azure.ai.evaluation import *' -> ok, AIAgentConverter in ns: False
+S3 'AIAgentConverter' in __all__: False
