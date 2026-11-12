@@ -22,8 +22,6 @@ results/            what was obtained
   RESULTS.md        narrative write-up
 supplement/         full worked cases for PR #41852 and PR #44844; one-page cards for the other six (LaTeX + PDF)
 rater_package/      what the external rater received (instructions and form); reusable for a new rater
-bug_reports/        the two issues filed with the project, as submitted, and their status
-history/            the larger study design drafted before the case study (not executed)
 METHODOLOGY_AND_REPLICATION.md   what was done, why, per-PR results and triage, limitations
 RUNBOOK.md          every command, in order, with expected outputs
 ```
