@@ -39,6 +39,8 @@ python run_experiments.py compare                  # this run's records vs resul
 
 The three defects are reproduced by the claim checks; read `replication/evidence/pr44844_G4_output.txt`, `pr41852_G4_output.txt` and `pr43269_G4_output.txt` against the `expect` line at the top of each. See `replication/README.md` for options and `RUNBOOK.md` for the manual version.
 
+Requirements: Python 3.12, git, about 1.5 GB of free disk, and network access to GitHub and PyPI. Use a fresh virtual environment (the #41852 check requires that `azure-ai-projects` is not installed, and the runner verifies this). Avoid cloud-synced folders such as iCloud Drive; the clone has many small files. To keep the clone elsewhere, add `-w ~/trustgates` to each command.
+
 ## License
 
 Code under MIT; documents, evidence and supplements under CC BY 4.0 (see `LICENSE`). Excerpts of code and pull-request text from `Azure/azure-sdk-for-python` are reproduced under its MIT License for the purpose of documenting the study.
